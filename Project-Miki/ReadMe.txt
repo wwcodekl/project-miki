@@ -12,17 +12,44 @@ Features:-
 	  ii) Select each item and it's amount by person
 	  ii) Select which item to split evenly + each item and amount by person
 
+Android version supported - Android 4.1 Jelly Bean and above
+
+Project Structure:- 
+
+├─ external libraries
+├─ app
+│  ├─ libs
+│  ├─ src
+│  │  ├─ androidTest
+│  │  │  └─ java
+│  │  │     └─ wwckl/projectmiki
+│  │  └─ main
+│  │     ├─ java
+│  │     │  └─ wwckl/projectmiki
+│  │     ├─ res
+│  │     └─ AndroidManifest.xml
+│  └─ proguard-rules.pro
+├─ build.gradle
+└─ settings.gradle
+
+Java Packages Architecture:-
+
+wwckl/projectmiki
+├─ models
+├─ utils
+├─ fragments
+└─ views
+   ├─ adapters
+   ├─ actionbar
+   ├─ widgets
+   └─ notifications
+
 High-level Technical Req:-
 --------------------------
 1. OCR - https://code.google.com/p/tesseract-ocr/
 2. Android Resources: - https://source.android.com/, http://developer.android.com/training/basics/firstapp/index.html
  
-Stuff to consider:-
------------------
-1.  Project Management Tools
-> https://www.openproject.org/
-> http://www.icescrum.org/en/
-> https://trello.com/
+Project Management Tools - https://trello.com/b/eTg0MwUT/project-miki
 
-2. Support
-> http://www.bugzilla.org/
+Reference:-
+https://github.com/futurice/android-best-practices
