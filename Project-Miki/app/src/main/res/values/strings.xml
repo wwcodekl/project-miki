@@ -1,8 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">ProjectMiki</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="app_name">Project Miki</string>
+    <string name="next">Next</string>
     <string name="action_settings">Settings</string>
+    <string name="dutch">Dutch</string>
+    <string name="treat">Treat</string>
+    <string name="share">Share</string>
 
+    <string name="pref_display_welcome">Display Welcome screen</string>
+    <string name="pref_summ_display_welcome">Display Welcome screen on startup</string>
+    <string name="show_welcome">Show this screen next time.</string>
+
+    <string name="take_a_photo_receipt">Take a photo of receipt</string>
+    <string name="take_multiple_photo_receipt">Take multiple photo of receipt</string>
+    <string name="select_image_from_gallery">Select an image from Gallery</string>
+
+    <string name="title_activity_bill_splitter">BillSplitterActivity</string>
+    <string name="receipt">Receipt</string>
+    <string name="cleaning_image">Cleaning image</string>
+
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+
+    <string name="about">About</string>
+    <string name="camera">Camera</string>
+    <string name="batch">Batch</string>
+    <string name="gallery">Gallery</string>
+    <string name="pref_auto_focus">Auto focus</string>
+    <string name="pref_summ_auto_focus">Auto focus ON</string>
+    <string name="pref_input_method">Default receipt mode</string>
+    <string name="rotate_left">Rotate left</string>
+    <string name="rotate_right">Rotate right</string>
+
+    <string-array name="pref_input_method">
+        <item name="pref_input_method_camera">Camera</item>
+        <item name="pref_input_method_batch">Batch mode camera</item>
+        <item name="pref_input_method_gallery">Gallery</item>
+    </string-array>
+    <string-array name="pref_input_method_values">
+        <item name="camera">Camera</item>
+        <item name="batch">Batch</item>
+        <item name="gallery">Gallery</item>
+    </string-array>
 </resources>

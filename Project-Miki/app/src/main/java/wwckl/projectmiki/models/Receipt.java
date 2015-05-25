@@ -1,5 +1,7 @@
 package wwckl.projectmiki.models;
 
+import android.graphics.Bitmap;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +9,8 @@ import java.util.List;
  * Created by cheeyim on 2/2/2015.
  */
 public class Receipt {
+    // Receipt image
+    public static Bitmap receiptBitmap = null;
 
     private Double total;
     private Double subTotal;
