@@ -11,7 +11,7 @@ import java.util.List;
 public class Receipt {
     // Receipt image
     public static Bitmap receiptBitmap = null;
-
+    public static String recognizedText;
     private Double total;
     private Double subTotal;
     private int noOfPplSharing;
