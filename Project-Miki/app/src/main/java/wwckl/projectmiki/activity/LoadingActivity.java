@@ -5,6 +5,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -33,9 +34,15 @@ public class LoadingActivity extends AppCompatActivity {
 
     private ImageView mImageView;
     private ProgressBar mProgressBar;
+    private TextView mTextView;
 
-    private int mProgressStatus = 0;
-    private Handler mHandler = new Handler();
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            stopProgressBar();
+        }
+    };
+    private Thread mThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,74 +56,47 @@ public class LoadingActivity extends AppCompatActivity {
         mImageView.setImageBitmap(mReceiptPicture);
 
         // Progress bar
-        startProgressBar();
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mTextView = (TextView) findViewById(R.id.tvRecognisedText);
 
-        // START OCR operation
-        TesseractDetectText();
+        // START thread to do back ground operations
+        startOperation();
 
         //Receipt.recognizedText = mRecognizedText;
-        // TODO: CLEAN UP DATA
-        if(!mRecognizedText.isEmpty()) {
-            TextView t = (TextView) findViewById(R.id.tvRecognisedText);
-            t.setText(mRecognizedText);
-
-            mImageView.setVisibility(View.GONE);
-        }
 
         // completed job. stop thread & hide progress bar
-        stopProgressBar();
         //startBillSplitting();
     }
 
-    // set value for progress bar.
-    public int incrementSpinner(){
-        switch (mProgressStatus) {
-            case 99:
-                return 0;
-            case 100:
-                return mProgressStatus;
-            default:
-                return mProgressStatus+1;
-        }
-    }
-
-    // Start thread to run progress bar
-    public void startProgressBar(){
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-
-        // start progress bar thread.
-        new Thread(new Runnable() {
-            public void run() {
-                while (mProgressStatus < 100) {
-                    mProgressStatus = incrementSpinner();
-
-                    // sleep 0.5 second
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    // Update the progress bar
-                    mHandler.post(new Runnable() {
-                        public void run() {
-                            mProgressBar.setProgress(mProgressStatus);
-                        }
-                    });
-                }
-            }
-        }).start();
-    }
-
     public void stopProgressBar(){
-        mProgressStatus = 100;
-
         mProgressBar.setVisibility(View.GONE);
+
+        if(!mRecognizedText.isEmpty())
+            mTextView.setText(mRecognizedText);
+        mImageView.setVisibility(View.GONE);
     }
 
     public void startBillSplitting(){
         // TODO: STORE RECEIPT RESULT?
         Intent intent = new Intent(this, BillSplitterActivity.class);
         startActivity(intent);
+    }
+
+    // Start thread to run Tesseract
+    public void startOperation(){
+
+        mThread = new Thread(new Runnable() {
+            public void run() {
+                // start Tesseract thread to detect text.
+                TesseractDetectText();
+
+                // TODO: CLEAN UP DATA
+
+                // Post message to handler to signal complete operation
+                mHandler.sendEmptyMessage(0);
+            }
+        });
+        mThread.start();
     }
 
     public void TesseractDetectText() {
