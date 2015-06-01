@@ -25,77 +25,12 @@ import wwckl.projectmiki.models.Receipt;
 
 
 public class MainActivity extends AppCompatActivity {
-    final int REQUEST_INPUT_METHOD = 1;
-    final int REQUEST_LOAD_IMAGE = 2;
-    final int REQUEST_IMAGE_CAPTURE = 3;
-    String inputMethod = "";
-    String picturePath = "";
-    ActionMode mActionMode = null;
-    Bitmap receiptImage = null;
-
-    // retrieves the selected input method
-    public void getDefaultInputMethod() {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean displayWelcome = sharedPrefs.getBoolean("pref_display_welcome", true);
-
-        if (displayWelcome) {
-            startWelcomeActivity();
-        }
-        else {
-            inputMethod = sharedPrefs.getString("pref_input_method", getString(R.string.gallery));
-            // Get receipt image based on selected/default input method.
-            getReceiptImage();
-        }
-    }
-
-    // retrieves the receipt image
-    public void getReceiptImage() {
-        // Retrieve image
-        if (inputMethod.equalsIgnoreCase(getString(R.string.gallery))) {
-            startSelectFromGallery();
-        }
-        else if (inputMethod.equalsIgnoreCase(getString(R.string.camera))) {
-            startImageCapture();
-        }
-        else {
-            Log.d("getReceiptImage", "NOT gallery or camera.");
-        }
-    }
-
-    // display welcome activity and returns with result
-    public void startWelcomeActivity() {
-        Intent intentInputMethod = new Intent(MainActivity.this, WelcomeActivity.class);
-        startActivityForResult(intentInputMethod, REQUEST_INPUT_METHOD);
-    }
-
-    // Select Image from gallery
-    public void startSelectFromGallery() {
-        Intent intentGallery = new Intent(
-                Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-        startActivityForResult(intentGallery, REQUEST_LOAD_IMAGE);
-    }
-
-    // Take a photo using Camera
-    public void startImageCapture() {
-        Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-        // start the image capture Intent
-        startActivityForResult(intentCamera, REQUEST_IMAGE_CAPTURE);
-    }
-
-    // onClick of next button
-    public void startLoadingAcitivty(View view){
-        Receipt.receiptBitmap = receiptImage;
-        Intent intent = new Intent(this, LoadingActivity.class);
-        startActivity(intent);
-    }
-
-    public static Bitmap RotateBitmap(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
-    }
+    final int REQUEST_INPUT_METHOD = 1;  // for checking of requestCode onActivityResult
+    final int REQUEST_PICTURE_MEDIASTORE = 2;
+    private String mInputMethod = ""; // whether to start Gallery or Camera
+    private String mPicturePath = ""; // path of where the picture is saved.
+    private ActionMode mActionMode = null; // for Context Action Bar
+    private Bitmap mReceiptPicture = null; // bitmap image of the receipt
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Set up listener for longClick menu for Image
+        // to allow user to rotate and crop image
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
         imageView.setOnLongClickListener(new View.OnLongClickListener() {
             // Called when the user long-clicks on someView
@@ -118,25 +54,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Check to run Welcome Activity
-        // or retrieve default input method
+        // if this is the first time loading this activity
         if (savedInstanceState == null) {
+            // Check to run Welcome Activity
+            // or retrieve default input method
             getDefaultInputMethod();
         }
     }
 
+    // on returning to activity from another activity.
     @Override
     public void onResume() {
         super.onResume();  // Always call the superclass method first
 
         TextView t = (TextView)findViewById(R.id.textView);
-        // Prompt user to Get image of receipt
-        if(picturePath.isEmpty()){
+
+        if(mPicturePath.isEmpty()){
+            // Prompt user to Get image of receipt
             t.setText(getString(R.string.take_a_photo_receipt)
                     +"\n or \n"
                     +getString(R.string.select_image_from_gallery));
         }
-        else{
+        else{ // image will be displayed, hide text.
             t.setVisibility(View.INVISIBLE);
         }
     }
@@ -150,17 +89,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Action bar menu.
+        // Action bar menu; perform activity based on menu item selected.
         switch (item.getItemId()) {
             case R.id.action_settings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
                 return true;
             case R.id.action_gallery:
-                startSelectFromGallery();
+                startGallery();
                 return true;
             case R.id.action_camera:
-                startImageCapture();
+                startCamera();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -175,19 +114,18 @@ public class MainActivity extends AppCompatActivity {
             // Retrieve Result from Welcome Screen
             case REQUEST_INPUT_METHOD:
                 if (resultCode == RESULT_OK) {
-                    inputMethod = data.getStringExtra("result_input_method");
+                    mInputMethod = data.getStringExtra("result_input_method");
                 }
                 else {
                     SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-                    inputMethod = sharedPrefs.getString("pref_input_method", getString(R.string.gallery));
+                    mInputMethod = sharedPrefs.getString("pref_input_method", getString(R.string.gallery));
                 }
                 // Get receipt image based on selected/default input method.
-                getReceiptImage();
+                getReceiptPicture();
                 break;
 
             // Retrieve Image from Gallery
-            case REQUEST_LOAD_IMAGE:
-            case REQUEST_IMAGE_CAPTURE:
+            case REQUEST_PICTURE_MEDIASTORE:
                 if (resultCode == RESULT_OK && data != null) {
                     Uri selectedImage = data.getData();
                     String[] filePathColumn = { MediaStore.Images.Media.DATA };
@@ -197,12 +135,12 @@ public class MainActivity extends AppCompatActivity {
                     cursor.moveToFirst();
 
                     int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    picturePath = cursor.getString(columnIndex);
+                    mPicturePath = cursor.getString(columnIndex);
                     cursor.close();
 
-                    receiptImage = BitmapFactory.decodeFile(picturePath);
+                    mReceiptPicture = BitmapFactory.decodeFile(mPicturePath);
                     ImageView imageView = (ImageView) findViewById(R.id.imageView);
-                    imageView.setImageBitmap(receiptImage);
+                    imageView.setImageBitmap(mReceiptPicture);
                 }
                 break;
 
@@ -212,8 +150,73 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // retrieves the selected or default input method
+    private void getDefaultInputMethod() {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean displayWelcome = sharedPrefs.getBoolean("pref_display_welcome", true);
+
+        if (displayWelcome) {
+            startWelcomeActivity();
+        }
+        else {
+            mInputMethod = sharedPrefs.getString("pref_input_method", getString(R.string.gallery));
+            // Get receipt image based on selected/default input method.
+            getReceiptPicture();
+        }
+    }
+
+    // retrieves the receipt image
+    private void getReceiptPicture() {
+        // Retrieve image
+        if (mInputMethod.equalsIgnoreCase(getString(R.string.gallery))) {
+            startGallery();
+        }
+        else if (mInputMethod.equalsIgnoreCase(getString(R.string.camera))) {
+            startCamera();
+        }
+        else {
+            Log.d("getReceiptImage", "NOT gallery or camera.");
+        }
+    }
+
+    // display welcome activity and returns with result
+    public void startWelcomeActivity() {
+        Intent intentInputMethod = new Intent(MainActivity.this, WelcomeActivity.class);
+        startActivityForResult(intentInputMethod, REQUEST_INPUT_METHOD);
+    }
+
+    // start gallery
+    private void startGallery() {
+        Intent intentGallery = new Intent(
+                Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        startActivityForResult(intentGallery, REQUEST_PICTURE_MEDIASTORE);
+    }
+
+    // Start Camera
+    private void startCamera() {
+        Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        // start the image capture Intent
+        startActivityForResult(intentCamera, REQUEST_PICTURE_MEDIASTORE);
+    }
+
+    // onClick of next button
+    public void startLoadingAcitivty(View view){
+        Receipt.receiptBitmap = mReceiptPicture;
+        Intent intent = new Intent(this, LoadingActivity.class);
+        startActivity(intent);
+    }
+
+    private static Bitmap RotateBitmap(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+    }
+
     // Setting up call backs for Action Bar that will
     // overlay existing when long click on image
+    // for editing of image. rotate/crop
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
         // Called when the action mode is created; startActionMode() was called
@@ -239,13 +242,13 @@ public class MainActivity extends AppCompatActivity {
 
             switch (item.getItemId()) {
                 case R.id.rotate_left:
-                    receiptImage = RotateBitmap(receiptImage, 270);
-                    imageView.setImageBitmap(receiptImage);
+                    mReceiptPicture = RotateBitmap(mReceiptPicture, 270);
+                    imageView.setImageBitmap(mReceiptPicture);
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 case R.id.rotate_right:
-                    receiptImage = RotateBitmap(receiptImage, 90);
-                    imageView.setImageBitmap(receiptImage);
+                    mReceiptPicture = RotateBitmap(mReceiptPicture, 90);
+                    imageView.setImageBitmap(mReceiptPicture);
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 default:
