@@ -44,4 +44,7 @@
         <item name="batch">Batch</item>
         <item name="gallery">Gallery</item>
     </string-array>
+
+    <string name="receipt_picture">Receipt picture</string>
+    <string name="recognised_text">Recognised text</string>
 </resources>

@@ -2,7 +2,23 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:actionModeBackground">@color/primary_material_dark</item>
+        <item name="android:actionModeStyle">@style/CustomActionMode</item>
+        <item name="android:actionModeCloseButtonStyle">@style/action_button_done</item>
+        <item name="android:actionBarDivider">@null</item>
+        <item name="android:actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
     </style>
 
+    <style name="CustomActionMode" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">?android:attr/actionModeBackground</item>
+        <item name="android:backgroundSplit">?android:attr/actionModeSplitBackground</item>
+        <item name="android:height">?android:attr/actionBarSize</item>
+        <item name="android:textColor">@color/primary_text_default_material_light</item>
+    </style>
+
+    <style name="action_button_done" parent="Widget.AppCompat.ActionButton.CloseMode">
+        <item name="android:actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
+        <item name="colorControlNormal">@color/primary_material_light</item>
+    </style>
 </resources>
