@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.models.Receipt;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private String mPicturePath = ""; // path of where the picture is saved.
     private ActionMode mActionMode = null; // for Context Action Bar
     private Bitmap mReceiptPicture = null; // bitmap image of the receipt
+    private Boolean mDoubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,6 +151,26 @@ public class MainActivity extends AppCompatActivity {
                 // Not the intended intent
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+    // Confirm exit application on back button by requesting BACK again.
+        if (mDoubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.mDoubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+        // This handle allows the flag to be reset after 2 seconds(i.e. Toast.LENGTH_SHORT's duration)
+            @Override
+            public void run() {
+                mDoubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
     }
 
     // retrieves the selected or default input method
