@@ -7,10 +7,12 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView mImageView;
     private TextView mTextView;
-    private TextView mAdjustContrastTextView;
-    private SeekBar mBrightnessBar;
+    private TextView mAdjustThresholdTextView;
+    private SeekBar mColorThresholdBar;
     private SeekBar mContrastBar;
 
     @Override
@@ -61,16 +63,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Get layout objects for manipulation later.
         mTextView = (TextView)findViewById(R.id.textView);
-        mAdjustContrastTextView = (TextView)findViewById(R.id.tvAdjustContrast);
-        mBrightnessBar = (SeekBar)findViewById(R.id.brightnessBar);
-        mContrastBar = (SeekBar)findViewById(R.id.contrastBar);
+        mAdjustThresholdTextView = (TextView)findViewById(R.id.tvAdjustThreshold);
 
-        // Setup Listener for Brightness Seek Bar
-        mBrightnessBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        // Setup Listener for Contrast Seek Bar
+        mContrastBar = (SeekBar)findViewById(R.id.contrastBar);
+        mContrastBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float contrastValue = convertContrastValue(mContrastBar.getProgress());
-                adjustContrastBrightness(contrastValue, convertBrightnessValue(progress));
+                adjustContrast(convertContrastValue(progress));
             }
 
             @Override
@@ -82,12 +82,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Setup Listener for Contrast Seek Bar
-        mContrastBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        // Setup Color threshold bar setup Listener
+        mColorThresholdBar = (SeekBar)findViewById(R.id.colorThresholdBar);
+        mColorThresholdBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float brightnessValue = convertBrightnessValue(mBrightnessBar.getProgress());
-                adjustContrastBrightness(convertContrastValue(progress), brightnessValue);
+                adjustThreshold(progress);
             }
 
             @Override
@@ -102,16 +102,16 @@ public class MainActivity extends AppCompatActivity {
         // Set up listener for menu for onClick of Image
         // to allow user to rotate and crop image
         mImageView = (ImageView) findViewById(R.id.imageView);
-        mImageView.setOnClickListener(new View.OnClickListener() {
-            // Called when the user clicks on ImageView
-            @Override
-            public void onClick(View view) {
+        mImageView.setOnLongClickListener(new View.OnLongClickListener() {
+            // Called when the user long-clicks on someView
+            public boolean onLongClick(View view) {
                 if (mActionMode != null) {
-                    return;
+                    return false;
                 }
                 // Start the CAB using the ActionMode.Callback defined above
                 mActionMode = MainActivity.this.startActionMode(mActionModeCallback);
                 view.setSelected(true);
+                return true;
             }
         });
 
@@ -133,16 +133,17 @@ public class MainActivity extends AppCompatActivity {
             mTextView.setText(getString(R.string.take_a_photo_receipt)
                     + "\n or \n"
                     + getString(R.string.select_image_from_gallery));
-            mAdjustContrastTextView.setVisibility(View.INVISIBLE);
-            mBrightnessBar.setVisibility(View.INVISIBLE);
+            mAdjustThresholdTextView.setVisibility(View.INVISIBLE);
             mContrastBar.setVisibility(View.INVISIBLE);
+            mColorThresholdBar.setVisibility(View.INVISIBLE);
         }
-        else{ // image will be displayed, hide text.
-            mTextView.setText(getString(R.string.adjust_brightness));
-            applyFilter();
-            mAdjustContrastTextView.setVisibility(View.VISIBLE);
-            mBrightnessBar.setVisibility(View.VISIBLE);
+        else{ // image will be displayed, change text.
+            mTextView.setText(getString(R.string.adjust_contrast));
+            mAdjustThresholdTextView.setVisibility(View.VISIBLE);
             mContrastBar.setVisibility(View.VISIBLE);
+            mColorThresholdBar.setVisibility(View.VISIBLE);
+            applyFilter();
+            adjustThreshold(mColorThresholdBar.getProgress());
         }
     }
 
@@ -194,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
             case REQUEST_PICTURE_MEDIASTORE:
                 if (resultCode == RESULT_OK && data != null) {
                     mPictureUri = data.getData();
+
                     String[] filePathColumn = { MediaStore.Images.Media.DATA };
 
                     Cursor cursor = getContentResolver().query(mPictureUri,
@@ -204,7 +206,37 @@ public class MainActivity extends AppCompatActivity {
                     mPicturePath = cursor.getString(columnIndex);
                     cursor.close();
 
-                    mReceiptPicture = BitmapFactory.decodeFile(mPicturePath);
+                    // We do not require high resolution images as it may cause OutOfMemoryError
+                    BitmapFactory.Options bmpOptions = new BitmapFactory.Options();
+                    // TODO: set scale factor according to file size.
+                    bmpOptions.inSampleSize = 2;
+                    mReceiptPicture = BitmapFactory.decodeFile(mPicturePath, bmpOptions);
+
+                    // Check picture orientation
+                    // Rotate image if needed.
+                    try {
+                        ExifInterface ei = new ExifInterface(mPicturePath);
+                        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                                ExifInterface.ORIENTATION_NORMAL);
+
+                        switch (orientation) {
+                            case ExifInterface.ORIENTATION_ROTATE_90:
+                                mReceiptPicture = RotateBitmap(mReceiptPicture, 90);
+                                break;
+                            case ExifInterface.ORIENTATION_ROTATE_180:
+                                mReceiptPicture = RotateBitmap(mReceiptPicture, 180);
+                                break;
+                            case ExifInterface.ORIENTATION_ROTATE_270:
+                                mReceiptPicture = RotateBitmap(mReceiptPicture, 270);
+                                break;
+                            default:
+                                break;
+                        }
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    // Display picture on screen
                     mImageView.setImageBitmap(mReceiptPicture);
                 }
                 break;
@@ -281,19 +313,23 @@ public class MainActivity extends AppCompatActivity {
     // Start Camera
     private void startCamera() {
         Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
         // start the image capture Intent
         startActivityForResult(intentCamera, REQUEST_PICTURE_MEDIASTORE);
     }
 
     // onClick of next button
-    public void startLoadingAcitivty(View view){
+    public void startLoadingAcitivty(View view) {
+        if (mColorThresholdBar.getProgress() >0)
+            mReceiptPicture = changeColor(mReceiptPicture, mColorThresholdBar.getProgress());
+
         Receipt.receiptBitmap = setFilter(mReceiptPicture);
         Intent intent = new Intent(this, LoadingActivity.class);
         startActivity(intent);
     }
 
-    private static Bitmap RotateBitmap(Bitmap source, float angle) {
+    /*----------- FUNCTIONS FOR IMAGE MANIPULATION: -------------*/
+
+    private Bitmap RotateBitmap(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
@@ -318,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // adjust imageView filter
+    // adjust imageView filter, do not set image with filter yet
     private void applyFilter(){
         ColorFilter colorFilter = new ColorMatrixColorFilter(mColorMatrix);
         mImageView.setColorFilter(colorFilter);
@@ -326,7 +362,7 @@ public class MainActivity extends AppCompatActivity {
 
     // set the Image with new filter, before proceed to next activity
     private Bitmap setFilter(Bitmap bitmapToConvert){
-        final ColorMatrixColorFilter colorFilter= new ColorMatrixColorFilter(mColorMatrix);
+        ColorMatrixColorFilter colorFilter= new ColorMatrixColorFilter(mColorMatrix);
         Bitmap bitmap = bitmapToConvert.copy(Bitmap.Config.ARGB_8888, true);
         Paint paint=new Paint();
         paint.setColorFilter(colorFilter);
@@ -343,25 +379,83 @@ public class MainActivity extends AppCompatActivity {
         return new_contrast;
     }
 
-    // Get a range of -50.0 ~ 10 for RGB offset value
-    private float convertBrightnessValue(int progress) {
-        float new_brightness = (((float) progress ) - 50) * 3;
-        if(new_brightness > 0){
-            new_brightness = new_brightness / 5;
-        }
-        return new_brightness;
-    }
-
-    // Adjust the contrast and brightness
-    private void adjustContrastBrightness(float contrast, float brightness)
+    // Adjust the contrast
+    private void adjustContrast(float contrast)
     {
         mColorMatrix = new float[]{
-                contrast, 0.5f, 0.5f, 0, brightness,
-                0.5f, contrast, 0.5f, 0, brightness,
-                0.5f, 0.5f, contrast, 0, brightness,
+                contrast, 0.5f, 0.5f, 0, 0,
+                0.5f, contrast, 0.5f, 0, 0,
+                0.5f, 0.5f, contrast, 0, 0,
                 0, 0, 0, 1, 0
         };
         applyFilter();
+    }
+
+    // Get the threshold value to change image colors
+    private void adjustThreshold(int progress){
+        if((progress == 0) || (progress == mColorThresholdBar.getMax())) {
+            mImageView.setImageBitmap(mReceiptPicture);
+            return;
+        }
+
+        mImageView.setImageBitmap(changeColor(mReceiptPicture, progress));
+    }
+
+    // Change bitmap image colours to 4 shades: black, dark gray, light gray or white
+    // We want contrasting shades, so no midshades such as gray.
+    private Bitmap changeColor(Bitmap src, int progress) {
+        final int absBlack = Math.abs(Color.BLACK);
+        final int absWhite = Math.abs(Color.WHITE);
+        int absLtGray = Math.abs(Color.LTGRAY);
+        int absDkGray = Math.abs(Color.DKGRAY);
+        int width = src.getWidth();
+        int height = src.getHeight();
+        int[] pixels = new int[width * height];
+        int maxProgress = mColorThresholdBar.getMax();
+        int factor = absBlack / maxProgress;
+        int threshold;
+
+        if ((progress == 0) || (progress == maxProgress))
+            return src;
+
+        //threshold to change to white or black
+        threshold = factor * progress;
+        if (progress < (maxProgress/2)){
+            absLtGray = threshold / 2;
+            absDkGray = absBlack - absLtGray;
+        }
+        else {
+            absLtGray = (threshold - absWhite) / 2;
+            absDkGray = threshold + ((absBlack - threshold) / 2);
+        }
+
+        // get pixel array from source
+        src.getPixels(pixels, 0, width, 0, 0, width, height);
+        Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
+
+        int pixel;
+        // iteration through pixels
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                // get current index in 2D-matrix
+                int index = y * width + x;
+                pixel = Math.abs(pixels[index]);
+                if(pixel < absLtGray){
+                    pixels[index] = Color.WHITE;
+                }
+                else if(pixel > absDkGray){
+                    pixels[index] = Color.BLACK;
+                }
+                else if(pixel < threshold){
+                    pixels[index] = Color.LTGRAY;
+                }
+                else{
+                    pixels[index] = Color.DKGRAY;
+                }
+            }
+        }
+        bmOut.setPixels(pixels, 0, width, 0, 0, width, height);
+        return bmOut;
     }
 
     // Setting up call backs for Action Bar that will
@@ -388,17 +482,16 @@ public class MainActivity extends AppCompatActivity {
         // Called when the user selects a contextual menu item
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            ImageView imageView = (ImageView) findViewById(R.id.imageView);
 
             switch (item.getItemId()) {
                 case R.id.rotate_left:
                     mReceiptPicture = RotateBitmap(mReceiptPicture, 270);
-                    imageView.setImageBitmap(mReceiptPicture);
+                    adjustThreshold(mColorThresholdBar.getProgress());
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 case R.id.rotate_right:
                     mReceiptPicture = RotateBitmap(mReceiptPicture, 90);
-                    imageView.setImageBitmap(mReceiptPicture);
+                    adjustThreshold(mColorThresholdBar.getProgress());
                     mode.finish();
                     return true;
                 case R.id.crop:

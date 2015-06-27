@@ -34,8 +34,8 @@
     <string name="rotate_left">Rotate left</string>
     <string name="rotate_right">Rotate right</string>
     <string name="crop">Crop</string>
-    <string name="adjust_brightness">Adjust Brightness</string>
     <string name="adjust_contrast">Adjust Contrast</string>
+    <string name="adjust_shades">Adjust Shades</string>
 
     <string-array name="pref_input_method">
         <item name="pref_input_method_camera">Camera</item>
