@@ -1,5 +1,7 @@
 Idea:-
 ------
+https://github.com/WomenWhoCode/KL-network/wiki/Project-Miki
+
 This is an open project to create an Android application to allow user the ability to split bill by taking a photo of the receipt  after those gatherings with friends and family in a fun and simple way! 
 
 Features:-
