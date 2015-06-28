@@ -25,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mAdjustThresholdTextView;
     private SeekBar mColorThresholdBar;
     private SeekBar mContrastBar;
+    private Button mNextButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         // Get layout objects for manipulation later.
         mTextView = (TextView)findViewById(R.id.textView);
         mAdjustThresholdTextView = (TextView)findViewById(R.id.tvAdjustThreshold);
+        mNextButton = (Button)findViewById(R.id.button_next);
 
         // Setup Listener for Contrast Seek Bar
         mContrastBar = (SeekBar)findViewById(R.id.contrastBar);
@@ -133,17 +136,24 @@ public class MainActivity extends AppCompatActivity {
             mTextView.setText(getString(R.string.take_a_photo_receipt)
                     + "\n or \n"
                     + getString(R.string.select_image_from_gallery));
+
             mAdjustThresholdTextView.setVisibility(View.INVISIBLE);
             mContrastBar.setVisibility(View.INVISIBLE);
             mColorThresholdBar.setVisibility(View.INVISIBLE);
+
+            mNextButton.setEnabled(false);
         }
         else{ // image will be displayed, change text.
             mTextView.setText(getString(R.string.adjust_contrast));
+
             mAdjustThresholdTextView.setVisibility(View.VISIBLE);
             mContrastBar.setVisibility(View.VISIBLE);
             mColorThresholdBar.setVisibility(View.VISIBLE);
+
             applyFilter();
             adjustThreshold(mColorThresholdBar.getProgress());
+
+            mNextButton.setEnabled(true);
         }
     }
 
@@ -322,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
         if (mColorThresholdBar.getProgress() >0)
             mReceiptPicture = changeColor(mReceiptPicture, mColorThresholdBar.getProgress());
 
-        Receipt.receiptBitmap = setFilter(mReceiptPicture);
+        Receipt.setReceiptBitmap(setFilter(mReceiptPicture));
         Intent intent = new Intent(this, LoadingActivity.class);
         startActivity(intent);
     }

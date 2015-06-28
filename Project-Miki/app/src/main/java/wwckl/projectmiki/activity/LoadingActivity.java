@@ -50,7 +50,7 @@ public class LoadingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_loading);
 
         // Set receipt image in background.
-        mReceiptPicture = Receipt.receiptBitmap;
+        mReceiptPicture = Receipt.getReceiptBitmap();
 
         mImageView = (ImageView) findViewById(R.id.imageViewLoading);
         mImageView.setImageBitmap(mReceiptPicture);
@@ -73,12 +73,12 @@ public class LoadingActivity extends AppCompatActivity {
             mTextView.setText(mRecognizedText);
         mImageView.setVisibility(View.GONE);
 
-        //Receipt.recognizedText = mRecognizedText;
-        //startBillSplitting();
+        // Store receipt text
+        Receipt.setRecognizedText(mRecognizedText);
+        startBillSplitting();
     }
 
     public void startBillSplitting(){
-        // TODO: STORE RECEIPT RESULT?
         Intent intent = new Intent(this, BillSplitterActivity.class);
         startActivity(intent);
     }
@@ -90,8 +90,6 @@ public class LoadingActivity extends AppCompatActivity {
             public void run() {
                 // start Tesseract thread to detect text.
                 TesseractDetectText();
-
-                // TODO: CLEAN UP DATA
 
                 // Post message to handler to signal complete operation
                 mHandler.sendEmptyMessage(0);
@@ -132,7 +130,7 @@ public class LoadingActivity extends AppCompatActivity {
         }
 
         TessBaseAPI tessBaseAPI = new TessBaseAPI();
-        tessBaseAPI.setDebug(true);
+        //tessBaseAPI.setDebug(true);
         tessBaseAPI.init(path, lang); //Init the Tess with the trained data file, with english language
 
         // Set the Receipt image

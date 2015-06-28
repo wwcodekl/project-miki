@@ -1,6 +1,46 @@
-<android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
-                                   xmlns:tools="http://schemas.android.com/tools"
-                                   android:id="@+id/pager"
-                                   android:layout_width="match_parent"
-                                   android:layout_height="match_parent"
-                                   tools:context="wwckl.projectmiki.activity.BillSplitterActivity"/>
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvRecognisedText"
+        android:contentDescription="@string/recognised_text"
+        android:layout_alignParentTop="true"/>
+    <RelativeLayout
+        android:id="@+id/InnerRelativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+        <Button
+            android:id="@+id/button_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/prev"
+            android:clickable="true"
+            android:onClick="previousGuest"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/button_next"
+            android:layout_toStartOf="@+id/button_next" />
+        <Button
+            android:id="@+id/button_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/next"
+            android:clickable="true"
+            android:onClick="nextGuest"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+        <Button
+            android:id="@+id/button_done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/done"
+            android:clickable="true"
+            android:onClick="finishBillSplit"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/button_next"
+            android:layout_toEndOf="@+id/button_next" />
+    </RelativeLayout>
+</RelativeLayout>

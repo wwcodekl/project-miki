@@ -49,8 +49,7 @@
         android:id="@+id/tvAdjustThreshold"
         android:layout_below="@+id/contrastBar"
         android:layout_centerHorizontal="true"
-        android:text="@string/adjust_shades"
-        android:visibility="invisible" />
+        android:text="@string/adjust_shades" />
 
     <SeekBar
         android:layout_width="match_parent"
