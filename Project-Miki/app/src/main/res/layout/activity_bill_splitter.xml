@@ -1,18 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:id="@+id/scrollItemized"
+        android:layout_weight="0.5">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/layoutItemized">
+            <CheckBox
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/select_all"
+                android:id="@+id/cbSelectAll" />
+        </LinearLayout>
+    </ScrollView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layoutTotals">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/subtotal"
+            android:id="@+id/tvSubTotal"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/total"
+            android:id="@+id/tvTotal"
+            android:layout_below="@+id/tvSubTotal"
+            android:layout_alignRight="@+id/tvSubTotal"
+            android:layout_alignEnd="@+id/tvSubTotal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/svc"
+            android:id="@+id/tvSVC"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/gst"
+            android:id="@+id/tvGST"
+            android:layout_below="@+id/tvSVC"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+    </RelativeLayout>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tvRecognisedText"
-        android:contentDescription="@string/recognised_text"
-        android:layout_alignParentTop="true"/>
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/guest"
+        android:id="@+id/tvGuest"
+        android:scrollbars="vertical"/>
     <RelativeLayout
-        android:id="@+id/InnerRelativeLayout"
+        android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
+        android:layout_height="wrap_content">
         <Button
             android:id="@+id/button_prev"
             android:layout_width="wrap_content"
@@ -43,4 +105,5 @@
             android:layout_toRightOf="@+id/button_next"
             android:layout_toEndOf="@+id/button_next" />
     </RelativeLayout>
-</RelativeLayout>
+
+</LinearLayout>

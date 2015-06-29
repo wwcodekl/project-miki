@@ -20,7 +20,7 @@
         </activity>
         <activity
             android:name=".activity.BillSplitterActivity"
-            android:label="@string/title_activity_bill_splitter"
+            android:label="@string/split_bill"
             android:parentActivityName=".activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

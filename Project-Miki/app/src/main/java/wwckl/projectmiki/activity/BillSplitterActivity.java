@@ -3,16 +3,21 @@ package wwckl.projectmiki.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.math.BigDecimal;
 
 import wwckl.projectmiki.R;
-import wwckl.projectmiki.fragment.SettingsFragment;
 import wwckl.projectmiki.models.Bill;
+import wwckl.projectmiki.models.BillSplitter;
+import wwckl.projectmiki.models.Item;
 import wwckl.projectmiki.models.Receipt;
 
 /**
@@ -20,16 +25,17 @@ import wwckl.projectmiki.models.Receipt;
  * To accomodate user preferences.
  */
 public class BillSplitterActivity extends AppCompatActivity {
-    final int DUTCH_TYPE = 0;
-    final int TREAT_TYPE = 1;
-    final int SHARE_TYPE = 2;
-
-    private TextView mTextView;
-    private int BillSplitType = DUTCH_TYPE;
+    private BillSplitter.BillSplitType mBillSplitType = BillSplitter.BillSplitType.DUTCH_TYPE;
     private Bill bill;
 
     private Menu mMenu;
     private Button mButtonPrev;
+    private LinearLayout mItemizedLayout;
+    private CheckBox mSelectAllChkBox;
+    private TextView mSvcTextView;
+    private TextView mGstTextView;
+    private TextView mSubTotalTextView;
+    private TextView mTotalTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,22 +43,26 @@ public class BillSplitterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bill_splitter);
 
         // Get the various layout objects
-
-        // testing, display recognised text
-        mTextView = (TextView) findViewById(R.id.tvRecognisedText);
-        String receiptText = Receipt.getRecognizedText();
-        if(!receiptText.isEmpty()) {
-            // Testing
-            mTextView.setText(receiptText);
-            bill = new Bill(receiptText);
-        }
-        else
-            Log.d("BillSplitter","empty receiptText");
+        mItemizedLayout = (LinearLayout)findViewById(R.id.layoutItemized);
+        mSelectAllChkBox = (CheckBox)findViewById(R.id.cbSelectAll);
+        mSvcTextView = (TextView)findViewById(R.id.tvSVC);
+        mGstTextView = (TextView)findViewById(R.id.tvGST);
+        mSubTotalTextView = (TextView)findViewById(R.id.tvSubTotal);
+        mTotalTextView = (TextView)findViewById(R.id.tvTotal);
 
         // Prev button should be disabled for 1st Guest
         mButtonPrev = (Button)findViewById(R.id.button_prev);
         mButtonPrev.setVisibility(View.INVISIBLE);
         mButtonPrev.setEnabled(false);
+
+        // Initialise Bill contents
+        if (Receipt.getRecognizedText().isEmpty())
+            Toast.makeText(this, "Could not read bill!", Toast.LENGTH_SHORT).show();
+        else {
+            bill = new Bill(Receipt.getRecognizedText());
+            drawItemizedLayout();
+            updateTotals();
+        }
     }
 
     @Override
@@ -73,9 +83,41 @@ public class BillSplitterActivity extends AppCompatActivity {
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
                 return true;
+            case R.id.dutch:
+                swapSplitType(BillSplitter.BillSplitType.DUTCH_TYPE);
+                return true;
+            case R.id.treat:
+                swapSplitType(BillSplitter.BillSplitType.TREAT_TYPE);
+                return true;
+            case R.id.share:
+                swapSplitType(BillSplitter.BillSplitType.SHARE_TYPE);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void swapSplitType(BillSplitter.BillSplitType splitType){
+        String toastMsg;
+        switch (splitType) {
+            case DUTCH_TYPE:
+                toastMsg = getString(R.string.dutch);
+                break;
+            case SHARE_TYPE:
+                toastMsg = getString(R.string.share);
+                break;
+            case TREAT_TYPE:
+                toastMsg = getString(R.string.treat);
+                break;
+            default:
+                Toast.makeText(this, "UNKNOWN TYPE", Toast.LENGTH_SHORT).show();
+                return;
+        }
+        Toast toast = Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT);
+        toast.show();
+
+        mBillSplitType = splitType;
+        updateMenuButtons();
     }
 
     // When shifting from one type of BillSplit type to another.
@@ -84,7 +126,7 @@ public class BillSplitterActivity extends AppCompatActivity {
         MenuItem itemTreat = mMenu.findItem(R.id.treat);
         MenuItem itemShare = mMenu.findItem(R.id.share);
 
-        switch(BillSplitType){
+        switch(mBillSplitType){
             default:
             case DUTCH_TYPE:
                 itemDutch.setEnabled(false);
@@ -102,5 +144,93 @@ public class BillSplitterActivity extends AppCompatActivity {
                 itemShare.setEnabled(false);
                 break;
         }
+    }
+
+    // populate the itemized layout with bill items.
+    private void drawItemizedLayout(){
+        if(bill == null)
+            return;
+
+        if(bill.getListOfAllItems().isEmpty())
+            return;
+
+        int numberOfItems = bill.getListOfAllItems().size();
+        CheckBox checkBox;
+        Item item;
+        String checkBoxText;
+
+        for (int i = 0; i < numberOfItems; i++) {
+            item = bill.getListOfAllItems().get(i);
+            checkBox = new CheckBox(this);
+            checkBox.setId(i);
+            checkBoxText = item.getDescription() + "\t$" + item.getPrice().toString();
+            checkBox.setText(checkBoxText);
+            checkBox.setOnClickListener(onItemCheckBoxClick(checkBox));
+            mItemizedLayout.addView(checkBox);
+        }
+    }
+
+    View.OnClickListener onItemCheckBoxClick(final Button button) {
+        return new View.OnClickListener() {
+            public void onClick(View v) {
+                System.out.println("*************id******" + button.getId());
+                System.out.println("and text***" + button.getText().toString());
+            }
+        };
+    }
+
+    private void updateTotals(){
+        if (bill == null)
+            return;
+
+        String tvText;
+        String delim = ": $";
+
+        // SERVICE CHARGE
+        if (bill.getSvc().compareTo(BigDecimal.ZERO) != 0) {
+            mSvcTextView.setVisibility(View.VISIBLE);
+            tvText = getString(R.string.svc);
+
+            if (bill.getSvcPercent() != 0)
+                tvText = tvText + " " + Integer.toString(bill.getSvcPercent()) + "%";
+
+            tvText = tvText + delim + bill.getSvc().toString();
+            mSvcTextView.setText(tvText);
+        }
+        else {
+            mSvcTextView.setVisibility(View.INVISIBLE);
+        }
+
+        // GST
+        if (bill.getGst().compareTo(BigDecimal.ZERO) != 0) {
+            mGstTextView.setVisibility(View.VISIBLE);
+            tvText = getString(R.string.gst);
+
+            if (bill.getGstPercent() != 0)
+                tvText = tvText + " " + Integer.toString(bill.getGstPercent()) + "%";
+
+            tvText = tvText + delim + bill.getGst().toString();
+            mGstTextView.setText(tvText);
+        }
+        else {
+            mGstTextView.setVisibility(View.INVISIBLE);
+        }
+
+        // SUBTOTAL
+        if (bill.getSubTotal().compareTo(BigDecimal.ZERO) != 0) {
+            mSubTotalTextView.setVisibility(View.VISIBLE);
+            tvText = getString(R.string.subtotal);
+
+            tvText = tvText + delim + bill.getSubTotal().toString();
+            mSubTotalTextView.setText(tvText);
+        }
+        else {
+            mSubTotalTextView.setVisibility(View.INVISIBLE);
+        }
+
+        // TOTAL, ALWAYS SHOW
+        tvText = getString(R.string.total);
+        tvText = tvText + delim + bill.getTotal().toString();
+        mTotalTextView.setText(tvText);
     }
 }

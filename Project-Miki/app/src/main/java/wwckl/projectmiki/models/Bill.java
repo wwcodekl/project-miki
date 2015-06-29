@@ -16,14 +16,15 @@ import java.util.regex.Pattern;
  * Created by cheeyim on 2/2/2015.
  */
 public class Bill {
-    private BigDecimal total;
-    private BigDecimal subTotal;
-    private BigDecimal gst;
-    private int gstPercent;
-    private BigDecimal svc;
-    private int svcPercent;
+    private BigDecimal total = new BigDecimal(0.00);
+    private BigDecimal subTotal = new BigDecimal(0.00);
+    private BigDecimal gst = new BigDecimal(0.00);
+    private int gstPercent = 0;
+    private BigDecimal svc = new BigDecimal(0.00);
+    private int svcPercent = 0;
     private int noOfPplSharing = 0;
     private List<Item> listOfAllItems = new ArrayList<Item>();
+    private List<BillSplitter> listOfGuests = new ArrayList<>();
 
     // hash words 'library'
     private static final Set<String> fTOTAL_WORDS = new LinkedHashSet<>();
@@ -149,6 +150,9 @@ public class Bill {
             lines[i].trim();
             parseLine(lines[i]);
         }
+
+        // Finished parsing, make sure bill is balanced
+        balanceBill();
     }
 
     // Check for common OCR parsing errors
@@ -177,6 +181,7 @@ public class Bill {
         // Get amount from line
         bdAmount = getAmount(line);
         if (bdAmount.compareTo(BigDecimal.ZERO) == 0) {
+            // line does not contain amount, skip
             Log.d("parseLine", line);
             return;
         }
@@ -191,7 +196,9 @@ public class Bill {
             Log.d("WHITELIST", line);
         }
         else if(containsToken(fTOTAL_WORDS, line)){
-            if(getTotal() != null) {
+            if(getTotal().compareTo(BigDecimal.ZERO) == 0) {
+                // Cash line may have an associated change line.
+                // Skip if we already have our total.
                 if (containsToken(fCASH_WORDS, line))
                     return;
             }
@@ -214,6 +221,7 @@ public class Bill {
             String desc = getDescription(line);
             BigDecimal amount = bdAmount;
 
+            // Divide amount by the quantity.
             if(qty > 1) {
                 BigDecimal bdQuantity = new BigDecimal(qty);
                 amount = bdAmount.divide(bdQuantity, 2, RoundingMode.HALF_UP);
@@ -286,6 +294,9 @@ public class Bill {
             return qty;
 
         strQuantity = matcher.group(1);
+        // more likely not quantity
+        if(strQuantity.length() > 2)
+            return qty;
         qty  = Integer.parseInt(strQuantity);
 
         Log.d("qty", String.valueOf(qty));
@@ -295,7 +306,7 @@ public class Bill {
     private String getDescription(String line){
         String desc = "Item";
 
-        line = line.replaceFirst("^([0-9]+)[ ]", "");
+        line = line.replaceFirst("^[0-9][0-9]?[ ]", "");
         line = line.replaceFirst("[0-9., -$]+$", "");
 
         if(!line.isEmpty())
@@ -330,5 +341,13 @@ public class Bill {
 
         Log.d("percent", String.valueOf(percentage));
         return percentage;
+    }
+
+    // ********************* END PARSING OF RECEIPT ************************
+
+    // To be done at initiazation after parsing of receipt
+    private void balanceBill(){
+        // all items must add up to total amount.
+
     }
 }

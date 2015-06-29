@@ -16,14 +16,10 @@
     <string name="take_multiple_photo_receipt">Take multiple photo of receipt</string>
     <string name="select_image_from_gallery">Select an image from Gallery</string>
 
-    <string name="title_activity_bill_splitter">Split Bill:</string>
+    <string name="split_bill">Split Bill:</string>
     <string name="receipt">Receipt</string>
     <string name="cleaning_image">Cleaning image</string>
     <string name="blank"></string>
-
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
 
     <string name="about">About</string>
     <string name="camera">Camera</string>
@@ -54,4 +50,10 @@
 
     <string name="prev">Prev</string>
     <string name="done">Done</string>
+    <string name="select_all">Select All</string>
+    <string name="total">Total</string>
+    <string name="subtotal">Sub total</string>
+    <string name="gst">GST</string>
+    <string name="svc">SVC</string>
+    <string name="guest">Guest</string>
 </resources>
