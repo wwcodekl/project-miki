@@ -7,6 +7,7 @@ import java.util.Objects;
  * Created by cheeyim on 2/2/2015.
  */
 public class Item {
+    final int fNOT_SELECTED = 1;
 
     private String description;
     private BigDecimal price;
@@ -15,7 +16,7 @@ public class Item {
     public Item(String description, BigDecimal price){
         this.description = description;
         this.price = price;
-        this.guestIndex = -1; // to indicate not selected
+        this.guestIndex = fNOT_SELECTED; // to indicate not selected
     }
 
     public String getDescription() {

@@ -56,4 +56,12 @@
     <string name="gst">GST</string>
     <string name="svc">SVC</string>
     <string name="guest">Guest</string>
+
+    <!-- non literal representation -->
+    <string name="symbol_currency">$</string>
+    
+    <!--- toast messages -->
+    <string name="could_not_read_bill">Could not read bill!</string>
+    <string name="bill_not_balanced">Bill not balanced!\nPlease check totals.</string>
+    <string name="unknown_type">UNKNOWN TYPE</string>
 </resources>

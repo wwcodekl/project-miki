@@ -29,6 +29,7 @@ public class Bill {
     private int mSVCpercent = 0;
     private BigDecimal mAdjust = new BigDecimal(0.00);
     private int mNoOfPplSharing = 0;
+    private int mBillSplitNum = 0;
     private List<Item> mListOfAllItems = new ArrayList<>();
     private List<BillSplitter> mListOfGuests = new ArrayList<>();
     private Boolean mUseSubtotals = false;
@@ -148,6 +149,14 @@ public class Bill {
 
     public void setNoOfPplSharing(int noOfPplSharing) {
         this.mNoOfPplSharing = noOfPplSharing;
+    }
+
+    public int getBillSplitNum() {
+        return this.mBillSplitNum;
+    }
+
+    public void setBillSplitNum(int billSplitNum) {
+        this.mBillSplitNum = billSplitNum;
     }
 
     public List<Item> getListOfAllItems() {
@@ -562,5 +571,28 @@ public class Bill {
         if(bdAmount.compareTo(BigDecimal.ZERO) == 0)
             return  true;
         return false;
+    }
+
+    // ******************* BILL SPLITTER ACTIVITY OPERATIONS ****************
+
+    public void selectItem(int itemIndex, Boolean checked){
+        Item item = mListOfAllItems.get(itemIndex);
+
+        if(checked)
+            item.setGuestIndex(mBillSplitNum);
+        else
+            item.setGuestIndex(item.fNOT_SELECTED);
+    }
+
+    // DUTCH option only
+    // TODO: ADD OTHER OPTIONS
+    public BigDecimal getGuestTotal(int guestIndex) {
+        BigDecimal total = new BigDecimal(0.00);
+
+        for (int i = 0; i < mListOfAllItems.size(); i++) {
+            if(mListOfAllItems.get(i).getGuestIndex() == guestIndex)
+                total = total.add(mListOfAllItems.get(i).getPrice());
+        }
+        return total;
     }
 }

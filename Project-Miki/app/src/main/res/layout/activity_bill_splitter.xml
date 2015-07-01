@@ -22,7 +22,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/select_all"
-                android:id="@+id/cbSelectAll" />
+                android:id="@+id/cbSelectAll"
+                android:onClick="onSelectAllChkBoxClicked"
+                android:nestedScrollingEnabled="false" />
         </LinearLayout>
     </ScrollView>
 
@@ -68,14 +70,29 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"/>
     </RelativeLayout>
-    <TextView
+
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/guest"
-        android:id="@+id/tvGuest"
         android:scrollbars="vertical"
-        android:fadeScrollbars="false"/>
+        android:fadeScrollbars="false"
+        android:id="@+id/layoutSummary">
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinnerSharing"
+            android:visibility="gone"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/guest"
+            android:id="@+id/tvSummary"/>
+    </LinearLayout>
+
     <RelativeLayout
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"

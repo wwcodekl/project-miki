@@ -22,4 +22,5 @@ public class BillSplitter {
     private BigDecimal ShareAmount = new BigDecimal(0.00);
     private int NoOfPplSharing = 0;
     private List<Item> listOfItems = new ArrayList<Item>(); // List of items selected.
+
 }
