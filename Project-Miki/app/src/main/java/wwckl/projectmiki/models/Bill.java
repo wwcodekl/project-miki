@@ -31,8 +31,8 @@ public class Bill {
     private int mNoOfPplSharing = 0;
     private int mBillSplitNum = 0;
     private List<Item> mListOfAllItems = new ArrayList<>();
-    private List<BillSplitter> mListOfGuests = new ArrayList<>();
-    private Boolean mUseSubtotals = false;
+    private List<BillSplit> mListOfGuests = new ArrayList<>();
+    private Boolean mUseSubtotals = false; // whether to include subtotals in calculations.
 
     // hash words 'library'
     private static final Set<String> fTOTAL_WORDS = new LinkedHashSet<>();
@@ -163,6 +163,9 @@ public class Bill {
         return this.mListOfAllItems;
     }
 
+    public List<BillSplit> getListOfGuests() { return this.mListOfGuests; }
+
+    // New Bill() initialisation method
     // parse receipt text and populate receipt values
     public Bill (String receiptText) {
         // Prep receipt
@@ -171,8 +174,8 @@ public class Bill {
         String[] lines = receiptText.split("[\n]+");
 
         // Parse each line of receipt
-        for(int i = 0; i<lines.length; i++){
-            parseLine(lines[i]);
+        for (String line : lines){
+            parseLine(line);
         }
 
         // Finished parsing, make sure bill is balanced
@@ -218,7 +221,7 @@ public class Bill {
         }
         Log.d("amount", bdAmount.toString());
 
-        // check for Total token
+        // check for different tokens
         if(containsToken(fSUBTOTAL_WORDS, line)){
             setSubTotal(bdAmount);
             Log.d("SUBTOTAL", line);
@@ -354,7 +357,6 @@ public class Bill {
     }
 
     private int getPercent(String line){
-        String strPercent;
         int percentage = 0;
 
         if(!line.contains("%"))
@@ -362,16 +364,14 @@ public class Bill {
 
         String tokens[] = line.split(" ");
 
-        for (int i = 0; i < tokens.length; i++) {
-            strPercent = tokens[i];
-
-            if(strPercent.contains("%")){
-                strPercent = strPercent.replaceAll("[.]00", "");
-                strPercent = strPercent.replaceAll("[%().]", "");
-                strPercent = strPercent.replaceAll("O","0");
-                strPercent = strPercent.replaceAll("l","1");
-                if(strPercent.matches("[0-9]+"))
-                    percentage = Integer.parseInt(strPercent);
+        for (String token : tokens) {
+            if(token.contains("%")){
+                token = token.replaceAll("[.]00", "");
+                token = token.replaceAll("[%().]", "");
+                token = token.replaceAll("O","0");
+                token = token.replaceAll("l","1");
+                if(token.matches("[0-9]+"))
+                    percentage = Integer.parseInt(token);
                 break;
             }
         }
@@ -384,8 +384,7 @@ public class Bill {
 
     // ********************** BALANCING THE BILL ***************************
     // Rules :
-    // IF GST and SVC is included in item price. Subtotal will be 0,
-    //   otherwise it is sum of all items in list.
+    // IF GST and SVC is included in item price. mUseSubtotals will be true.
     // *********************************************************************
 
     // To be done at initiazation after parsing of receipt
@@ -514,9 +513,10 @@ public class Bill {
         Log.d("UseSubtotals", mUseSubtotals.toString());
     }
 
-    private int calculatePercent(BigDecimal fracAmont, BigDecimal total){
+    // calculates the percentage of fracAmount/total
+    private int calculatePercent(BigDecimal fracAmount, BigDecimal total){
         BigDecimal percent;
-        percent = fracAmont.multiply(BigDecimal.valueOf(100));
+        percent = fracAmount.multiply(BigDecimal.valueOf(100));
         percent = percent.divide(total, 0, BigDecimal.ROUND_HALF_EVEN);
         return percent.intValue();
     }
@@ -584,15 +584,41 @@ public class Bill {
             item.setGuestIndex(item.fNOT_SELECTED);
     }
 
-    // DUTCH option only
-    // TODO: ADD OTHER OPTIONS
+    // return total of selected item's price by guest, no Split type calculations
     public BigDecimal getGuestTotal(int guestIndex) {
         BigDecimal total = new BigDecimal(0.00);
 
         for (int i = 0; i < mListOfAllItems.size(); i++) {
-            if(mListOfAllItems.get(i).getGuestIndex() == guestIndex)
-                total = total.add(mListOfAllItems.get(i).getPrice());
+            if(mListOfAllItems.get(i).getGuestIndex() == guestIndex) {
+                BigDecimal itemPrice = mListOfAllItems.get(i).getPrice();
+                total = total.add(itemPrice);
+            }
+        }
+        if (mUseSubtotals) {
+            // Add GST
+            if (mGSTpercent > 0) {
+                BigDecimal addPrice = total.multiply(BigDecimal.valueOf(mGSTpercent));
+                addPrice = addPrice.divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_EVEN);
+                total = total.add(addPrice);
+                Log.d("GST of total", addPrice.toString());
+            }
+            // Add SVC
+            if (mSVCpercent > 0) {
+                BigDecimal addPrice = total.multiply(BigDecimal.valueOf(mSVCpercent));
+                addPrice = addPrice.divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_EVEN);
+                total = total.add(addPrice);
+                Log.d("SVC of item", addPrice.toString());
+            }
         }
         return total;
     }
+
+    // User clicked next or done, create new BillSplit ListItem
+    public void splitTheBill (BillSplit.BillSplitType splitType) {
+        BillSplit billSplit = new BillSplit(splitType);
+    }
+
+    // User clicked prev, need to retrieve previous items and
+    // delete last BillSplit item.
+    public void backTrack () {}
 }

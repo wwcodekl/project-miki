@@ -79,6 +79,13 @@
         android:fadeScrollbars="false"
         android:id="@+id/layoutSummary">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/dutch"
+            android:id="@+id/tvSplitType" />
+
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

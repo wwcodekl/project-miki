@@ -28,7 +28,7 @@ import wwckl.projectmiki.models.Receipt;
  * To accomodate user preferences.
  */
 public class BillSplitterActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
-    final int fMAX_SHARING = 20;
+    final int fMAX_SHARING = 9;
     private BillSplitter.BillSplitType mBillSplitType = BillSplitter.BillSplitType.DUTCH_TYPE;
     private Bill mBill;
     private int mNumOfItems = 0;
@@ -42,6 +42,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     private TextView mGstTextView;
     private TextView mSubTotalTextView;
     private TextView mTotalTextView;
+    private TextView mSplitTypeTextView;
     private TextView mSummaryTextView;
     private Spinner mShareSpinner;
     ArrayAdapter<String> mShareAdapter;
@@ -57,6 +58,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         mGstTextView = (TextView)findViewById(R.id.tvGST);
         mSubTotalTextView = (TextView)findViewById(R.id.tvSubTotal);
         mTotalTextView = (TextView)findViewById(R.id.tvTotal);
+        mSplitTypeTextView = (TextView)findViewById(R.id.tvSplitType);
         mSummaryTextView = (TextView)findViewById(R.id.tvSummary);
 
         // Prev button should be disabled for 1st Guest
@@ -94,7 +96,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         mMenuItemTreat = menu.findItem(R.id.treat);
         mMenuItemShare = menu.findItem(R.id.share);
 
-        updateMenuButtons();
+        updateMenuButtons(getBillSplitString(mBillSplitType));
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -123,6 +125,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         mBill.setNoOfPplSharing(getNumOfSharing());
+        updateTotals();
     }
 
     @Override
@@ -130,6 +133,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
 
     }
 
+    // Select all checkbox clicked
     public void onSelectAllChkBoxClicked(View view) {
         // Is the view now checked?
         boolean checked = ((CheckBox) view).isChecked();
@@ -155,16 +159,16 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     public void finishBillSplit(View view) {}
 
     private void swapSplitType(BillSplitter.BillSplitType splitType){
-        Toast toast = Toast.makeText(this, getBillSplitString(splitType), Toast.LENGTH_SHORT);
-        toast.show();
+        String billSplitString = getBillSplitString(splitType);
 
         mBillSplitType = splitType;
-        updateMenuButtons();
+
+        updateMenuButtons(billSplitString);
+        updateSummary();
     }
 
     // When shifting from one type of BillSplit type to another.
-    private void updateMenuButtons() {
-
+    private void updateMenuButtons(String billSplitString) {
         switch(mBillSplitType){
             default:
             case DUTCH_TYPE:
@@ -173,6 +177,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 mMenuItemShare.setEnabled(true);
                 mShareSpinner.setVisibility(View.INVISIBLE);
                 mBill.setNoOfPplSharing(0);
+                mSplitTypeTextView.setText(billSplitString);
                 break;
             case TREAT_TYPE:
                 mMenuItemDutch.setEnabled(true);
@@ -180,6 +185,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 mMenuItemShare.setEnabled(true);
                 mShareSpinner.setVisibility(View.VISIBLE);
                 mBill.setNoOfPplSharing(getNumOfSharing());
+                mSplitTypeTextView.setText(billSplitString + " by");
                 break;
             case SHARE_TYPE:
                 mMenuItemDutch.setEnabled(true);
@@ -187,6 +193,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 mMenuItemShare.setEnabled(false);
                 mShareSpinner.setVisibility(View.VISIBLE);
                 mBill.setNoOfPplSharing(getNumOfSharing());
+                mSplitTypeTextView.setText(billSplitString + " by");
                 break;
         }
     }
@@ -220,7 +227,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             public void onClick(View v) {
                 int itemIndex = button.getId();
                 boolean checked = ((CheckBox) v).isChecked();
-                System.out.println("**item clicked:" + button.getText().toString());
+
                 mBill.selectItem(itemIndex, checked);
                 updateSummary();
             }
@@ -297,10 +304,32 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     private void updateSummary(){
         int numOfSplits = mBill.getBillSplitNum();
         String summaryText = "";
-        for (int i = 0; i <= numOfSplits; i++) {
-            String guestText = getString(R.string.guest) +" " + Integer.toString(i+1) + ": " + mBill.getGuestTotal(i) + "\n";
+
+        for (int i = 0; i < numOfSplits; i++) {
+            String guestText;
+            BillSplitter billSplit = mBill.getListOfGuests().get(i);
+
+            switch ( billSplit.getSplitType() ) {
+                case DUTCH_TYPE:
+                default:
+                    guestText = getString(R.string.guest) +" : " + billSplit.getSplitAmount().toString() + "\n";
+                case SHARE_TYPE:
+                case TREAT_TYPE:
+                    guestText = getString(R.string.guest) +"s : " + billSplit.getSplitAmount().toString() + "\n";
+            }
+
             summaryText = summaryText + guestText;
         }
+
+        BigDecimal amount = mBill.getGuestTotal(numOfSplits);
+        if ( mBillSplitType == BillSplitter.BillSplitType.DUTCH_TYPE )
+            summaryText = summaryText + getString(R.string.guest) +" : $" +
+                    amount.toString() + "\n";
+        else {
+            amount = amount.divide(BigDecimal.valueOf(getNumOfSharing()), 2, BigDecimal.ROUND_HALF_EVEN);
+            summaryText = summaryText + getString(R.string.guest) + "s : $" + amount + "\n";
+        }
+
         mSummaryTextView.setText(summaryText);
     }
 
