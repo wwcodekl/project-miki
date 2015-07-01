@@ -26,7 +26,7 @@ import wwckl.projectmiki.models.Receipt;
  */
 public class BillSplitterActivity extends AppCompatActivity {
     private BillSplitter.BillSplitType mBillSplitType = BillSplitter.BillSplitType.DUTCH_TYPE;
-    private Bill bill;
+    private Bill mBill;
 
     private Menu mMenu;
     private Button mButtonPrev;
@@ -59,9 +59,12 @@ public class BillSplitterActivity extends AppCompatActivity {
         if (Receipt.getRecognizedText().isEmpty())
             Toast.makeText(this, "Could not read bill!", Toast.LENGTH_SHORT).show();
         else {
-            bill = new Bill(Receipt.getRecognizedText());
+            mBill = new Bill(Receipt.getRecognizedText());
             drawItemizedLayout();
             updateTotals();
+            if(!mBill.isBillBalanced()){
+                Toast.makeText(this, "Bill not balanced!\nPlease check totals.", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -148,19 +151,19 @@ public class BillSplitterActivity extends AppCompatActivity {
 
     // populate the itemized layout with bill items.
     private void drawItemizedLayout(){
-        if(bill == null)
+        if(mBill == null)
             return;
 
-        if(bill.getListOfAllItems().isEmpty())
+        if(mBill.getListOfAllItems().isEmpty())
             return;
 
-        int numberOfItems = bill.getListOfAllItems().size();
+        int numberOfItems = mBill.getListOfAllItems().size();
         CheckBox checkBox;
         Item item;
         String checkBoxText;
 
         for (int i = 0; i < numberOfItems; i++) {
-            item = bill.getListOfAllItems().get(i);
+            item = mBill.getListOfAllItems().get(i);
             checkBox = new CheckBox(this);
             checkBox.setId(i);
             checkBoxText = item.getDescription() + "\t$" + item.getPrice().toString();
@@ -180,21 +183,21 @@ public class BillSplitterActivity extends AppCompatActivity {
     }
 
     private void updateTotals(){
-        if (bill == null)
+        if (mBill == null)
             return;
 
         String tvText;
         String delim = ": $";
 
         // SERVICE CHARGE
-        if (bill.getSvc().compareTo(BigDecimal.ZERO) != 0) {
+        if (mBill.getSvc().compareTo(BigDecimal.ZERO) != 0) {
             mSvcTextView.setVisibility(View.VISIBLE);
             tvText = getString(R.string.svc);
 
-            if (bill.getSvcPercent() != 0)
-                tvText = tvText + " " + Integer.toString(bill.getSvcPercent()) + "%";
+            if (mBill.getSvcPercent() != 0)
+                tvText = tvText + " " + Integer.toString(mBill.getSvcPercent()) + "%";
 
-            tvText = tvText + delim + bill.getSvc().toString();
+            tvText = tvText + delim + mBill.getSvc().toString();
             mSvcTextView.setText(tvText);
         }
         else {
@@ -202,14 +205,14 @@ public class BillSplitterActivity extends AppCompatActivity {
         }
 
         // GST
-        if (bill.getGst().compareTo(BigDecimal.ZERO) != 0) {
+        if (mBill.getGst().compareTo(BigDecimal.ZERO) != 0) {
             mGstTextView.setVisibility(View.VISIBLE);
             tvText = getString(R.string.gst);
 
-            if (bill.getGstPercent() != 0)
-                tvText = tvText + " " + Integer.toString(bill.getGstPercent()) + "%";
+            if (mBill.getGstPercent() != 0)
+                tvText = tvText + " " + Integer.toString(mBill.getGstPercent()) + "%";
 
-            tvText = tvText + delim + bill.getGst().toString();
+            tvText = tvText + delim + mBill.getGst().toString();
             mGstTextView.setText(tvText);
         }
         else {
@@ -217,11 +220,11 @@ public class BillSplitterActivity extends AppCompatActivity {
         }
 
         // SUBTOTAL
-        if (bill.getSubTotal().compareTo(BigDecimal.ZERO) != 0) {
+        if (mBill.getSubTotal().compareTo(BigDecimal.ZERO) != 0) {
             mSubTotalTextView.setVisibility(View.VISIBLE);
             tvText = getString(R.string.subtotal);
 
-            tvText = tvText + delim + bill.getSubTotal().toString();
+            tvText = tvText + delim + mBill.getSubTotal().toString();
             mSubTotalTextView.setText(tvText);
         }
         else {
@@ -230,7 +233,7 @@ public class BillSplitterActivity extends AppCompatActivity {
 
         // TOTAL, ALWAYS SHOW
         tvText = getString(R.string.total);
-        tvText = tvText + delim + bill.getTotal().toString();
+        tvText = tvText + delim + mBill.getTotal().toString();
         mTotalTextView.setText(tvText);
     }
 }

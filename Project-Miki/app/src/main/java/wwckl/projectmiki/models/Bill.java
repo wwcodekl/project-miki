@@ -16,15 +16,22 @@ import java.util.regex.Pattern;
  * Created by cheeyim on 2/2/2015.
  */
 public class Bill {
-    private BigDecimal total = new BigDecimal(0.00);
-    private BigDecimal subTotal = new BigDecimal(0.00);
-    private BigDecimal gst = new BigDecimal(0.00);
-    private int gstPercent = 0;
-    private BigDecimal svc = new BigDecimal(0.00);
-    private int svcPercent = 0;
-    private int noOfPplSharing = 0;
-    private List<Item> listOfAllItems = new ArrayList<Item>();
-    private List<BillSplitter> listOfGuests = new ArrayList<>();
+    final int fMaxGSTpercent = 21;
+    final int fMinGSTpercent = 5;
+    final int fMaxSVCpercent = 21;
+    final int fMinSVCpercent = 5;
+
+    private BigDecimal mTotal = new BigDecimal(0.00);
+    private BigDecimal mSubTotal = new BigDecimal(0.00);
+    private BigDecimal mGST = new BigDecimal(0.00);
+    private int mGSTpercent = 0;
+    private BigDecimal mSVC = new BigDecimal(0.00);
+    private int mSVCpercent = 0;
+    private BigDecimal mAdjust = new BigDecimal(0.00);
+    private int mNoOfPplSharing = 0;
+    private List<Item> mListOfAllItems = new ArrayList<>();
+    private List<BillSplitter> mListOfGuests = new ArrayList<>();
+    private Boolean mUseSubtotals = false;
 
     // hash words 'library'
     private static final Set<String> fTOTAL_WORDS = new LinkedHashSet<>();
@@ -33,6 +40,7 @@ public class Bill {
     private static final Set<String> fSVC_WORDS = new LinkedHashSet<>();
     private static final Set<String> fCASH_WORDS = new LinkedHashSet<>();
     private static final Set<String> fWHITELIST_WORDS = new LinkedHashSet<>();
+    private static final Set<String> fADJUST_WORDS = new LinkedHashSet<>();
     // initialise word tokens
     static {
         fTOTAL_WORDS.add("TOTAL");
@@ -68,74 +76,82 @@ public class Bill {
         fWHITELIST_WORDS.add("CHANGE");
         fWHITELIST_WORDS.add("BALANCE");
         fWHITELIST_WORDS.add("QTY");
-        fWHITELIST_WORDS.add("ROUNDING");
-        fWHITELIST_WORDS.add("ROUNDOFF");
         fWHITELIST_WORDS.add("SAVINGS");
         //fWHITELIST_WORDS.add("TOTAL SAVINGS");
         fWHITELIST_WORDS.add("DISCOUNT");
-        fWHITELIST_WORDS.add("ADJUST");
+        fADJUST_WORDS.add("ROUNDING");
+        fADJUST_WORDS.add("ROUNDOFF");
+        fADJUST_WORDS.add("ADJUST");
         //fWHITELIST_WORDS.add("ADJUSTMENT");
         //fWHITELIST_WORDS.add("TOTAL ADJUSTMENT");
     }
 
     public BigDecimal getTotal() {
-        return this.total;
+        return this.mTotal;
     }
 
     public void setTotal(BigDecimal total) {
-        this.total = total;
+        this.mTotal = total;
     }
 
     public BigDecimal getSubTotal() {
-        return this.subTotal;
+        return this.mSubTotal;
     }
 
     public void setSubTotal(BigDecimal subTotal) {
-        this.subTotal = subTotal;
+        this.mSubTotal = subTotal;
     }
 
     public BigDecimal getGst() {
-        return this.gst;
+        return this.mGST;
     }
 
     public void setGst(BigDecimal gst){
-        this.gst = gst;
+        this.mGST = gst;
     }
 
     public int getGstPercent(){
-        return this.gstPercent;
+        return this.mGSTpercent;
     }
 
     public void setGstPercent(int gstPercent){
-        this.gstPercent = gstPercent;
+        this.mGSTpercent = gstPercent;
     }
 
     public BigDecimal getSvc() {
-        return this.svc;
+        return this.mSVC;
     }
 
     public void setSvc(BigDecimal svc){
-        this.svc = svc;
+        this.mSVC = svc;
     }
 
     public int getSvcPercent(){
-        return this.svcPercent;
+        return this.mSVCpercent;
     }
 
     public void setSvcPercent(int svcPercent){
-        this.svcPercent = svcPercent;
+        this.mSVCpercent = svcPercent;
+    }
+
+    public BigDecimal getAdjust() {
+        return this.mAdjust;
+    }
+
+    public void setAdjust(BigDecimal adjust){
+        this.mAdjust = adjust;
     }
 
     public int getNoOfPplSharing() {
-        return this.noOfPplSharing;
+        return this.mNoOfPplSharing;
     }
 
     public void setNoOfPplSharing(int noOfPplSharing) {
-        this.noOfPplSharing = noOfPplSharing;
+        this.mNoOfPplSharing = noOfPplSharing;
     }
 
     public List<Item> getListOfAllItems() {
-        return this.listOfAllItems;
+        return this.mListOfAllItems;
     }
 
     // parse receipt text and populate receipt values
@@ -147,7 +163,6 @@ public class Bill {
 
         // Parse each line of receipt
         for(int i = 0; i<lines.length; i++){
-            lines[i].trim();
             parseLine(lines[i]);
         }
 
@@ -157,17 +172,24 @@ public class Bill {
 
     // Check for common OCR parsing errors
     private String cleanupOCRerrors(String receiptText){
+        // we don't need question marks, assume 7
+        receiptText = receiptText.replaceAll("\\?", "7");
         // common ocr error, where picture has noise at edges
         receiptText = receiptText.replaceAll("(?m)^[^A-Za-z0-9]+", "");
         receiptText = receiptText.replaceAll("(?m)[^A-Za-z0-9]+$", "");
         // common ocr errors:
         receiptText = receiptText.replaceAll("Tota1", "Total");
+        receiptText = receiptText.replaceAll("T0ta1", "Total");
         receiptText = receiptText.replaceAll("tota1", "total");
+        receiptText = receiptText.replaceAll("10ta1", "total");
         receiptText = receiptText.replaceAll("Totai", "Total");
         receiptText = receiptText.replaceAll("totai", "total");
         receiptText = receiptText.replaceAll("TDTAL", "TOTAL");
+        receiptText = receiptText.replaceAll("T0TAL", "TOTAL");
         receiptText = receiptText.replaceAll("(?m)^EST ", "GST ");
         receiptText = receiptText.replaceAll(" EST ", " GST ");
+        receiptText = receiptText.replaceAll("MQSTER", "MASTER");
+        receiptText = receiptText.replaceAll("MA$TER", "MASTER");
 
         return receiptText;
     }
@@ -189,7 +211,7 @@ public class Bill {
 
         // check for Total token
         if(containsToken(fSUBTOTAL_WORDS, line)){
-            this.setSubTotal(bdAmount);
+            setSubTotal(bdAmount);
             Log.d("SUBTOTAL", line);
         }
         else if(containsToken(fWHITELIST_WORDS, line)){
@@ -215,7 +237,12 @@ public class Bill {
             this.setSvcPercent(getPercent(line));
             Log.d("SVC", line);
         }
-        else { // ITEM
+        else if(containsToken(fADJUST_WORDS, line)){
+            setAdjust(bdAmount);
+            Log.d("ADJUST", line);
+        }
+        else if(isZero(sumOfTotals()) && isZero(mTotal))
+        { // ITEM
             Log.d("ITEM", line);
             int qty = getQuantity(line);
             String desc = getDescription(line);
@@ -229,7 +256,7 @@ public class Bill {
             }
 
             for (int i = 0; i < qty; i++) {
-                listOfAllItems.add(new Item(desc, amount));
+                mListOfAllItems.add(new Item(desc, amount));
             }
         }
     }
@@ -239,30 +266,31 @@ public class Bill {
         BigDecimal bdAmount = new BigDecimal(0);
         String strAmount;
 
-        // prep string, remove common ocr mistakes of various symbols
-        strAmount = line.replaceAll("([0-9])[-,']([0-9])", "$1.$2");
+        // prep string, remove common ocr mistakes of various symbols in amount
+        strAmount = line.replaceAll("([0-9][ ]?)[^0-9 ]([ ]?[0-9])$", "$1.$2");
         //Log.d("strAmount 0", strAmount);
 
         // receipts tend to have bigger font size of total amount
         // which may lend OCR to add spaces between the numbers and period.
+        // otherwise, assume number belongs to item description.
         if(strAmount.contains(" .") || strAmount.contains(". ")) {
             strAmount = strAmount.replaceAll("O", "0");
-            strAmount = strAmount.replaceAll("([0-9 ])[-,]([0-9 ])", "$1.$2");
+            strAmount = strAmount.replaceAll("([0-9 ])[.]([0-9 ])", "$1.$2");
             strAmount = strAmount.replaceAll("([0-9.]) ([0-9.])", "$1$2");
             strAmount = strAmount.replaceAll("([0-9.]) ([0-9.])", "$1$2");
             Log.d("strAmount 1", strAmount);
         }
 
         // Match end of line amount
-        Pattern pattern = Pattern.compile("([0-9.]+)$");
+        String strPattern = "[-]?[0-9]+[.][0-9][0-9]";
+        Pattern pattern = Pattern.compile( "(" + strPattern + ")$" );
         Matcher matcher = pattern.matcher(strAmount);
 
         if(!matcher.find())
             return bdAmount;
         strAmount = matcher.group(1);
-        //Log.d("strAmount 2", strAmount);
+        Log.d("strAmount 2", strAmount);
 
-        String strPattern = "[0-9]+[.][0-9][0-9]";
         // Check if we found amount match.
         if(!strAmount.matches(strPattern))
             return bdAmount;
@@ -345,9 +373,194 @@ public class Bill {
 
     // ********************* END PARSING OF RECEIPT ************************
 
+    // ********************** BALANCING THE BILL ***************************
+    // Rules :
+    // IF GST and SVC is included in item price. Subtotal will be 0,
+    //   otherwise it is sum of all items in list.
+    // *********************************************************************
+
     // To be done at initiazation after parsing of receipt
     private void balanceBill(){
-        // all items must add up to total amount.
+        int comparison;
+        BigDecimal sumOfItems = sumOfItems();
+        mUseSubtotals = false;
 
+        // initial Total check
+        if (isZero(mTotal))
+            mTotal = sumOfItems;
+        else if (sumOfItems.compareTo(mTotal) < 0) {
+            // set flag whether to calculate items using subtotals or total
+            mUseSubtotals = true;
+            // initial SubTotal check
+            if (isZero(mSubTotal)) {
+                mSubTotal = sumOfItems;
+            }
+
+            // GST
+            int percent = 0;
+            if (!isZero(mGST))
+                percent = calculatePercent(mGST, mSubTotal);
+            else if (mGSTpercent != 0)
+                percent = mGSTpercent;
+
+            if ((percent >= fMinGSTpercent) && (percent <= fMaxGSTpercent)) {
+                if ((mGSTpercent < (percent-1)) || (mGSTpercent > (percent+1))) // allow for margin of error from rounding
+                    mGSTpercent = percent;
+                else if (isZero(mGST)) {
+                    mGST = mTotal.multiply(BigDecimal.valueOf(percent));
+                    mGST = mGST.divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_EVEN);
+                }
+            }
+            else if (percent != 0) {
+                // Could not resolve error in one of the values, clear
+                mGST = BigDecimal.ZERO;
+                mGSTpercent = 0;
+            }
+
+            // SVC
+            percent = 0;
+            if (!isZero(mSVC))
+                percent = calculatePercent(mSVC, mSubTotal);
+            else if (mSVCpercent != 0)
+                percent = mSVCpercent;
+
+            if ((percent >= fMinSVCpercent) && (percent <= fMaxSVCpercent)) {
+                if ((mSVCpercent < (percent-1)) || (mSVCpercent > (percent+1))) // allow for margin of error
+                    mSVCpercent = percent;
+                else if (isZero(mSVC)) {
+                    mSVC = mTotal.multiply(BigDecimal.valueOf(percent));
+                    mSVC = mSVC.divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_EVEN);
+                }
+            }
+            else if (percent != 0) {
+                // Could not resolve error in one of the values, clear
+                mSVC = BigDecimal.ZERO;
+                mSVCpercent = 0;
+            }
+
+            // Sub Total
+            BigDecimal sumOfTotals = sumOfTotals();
+            BigDecimal amount;
+            comparison = sumOfTotals.compareTo(mTotal);
+            // SubTotal + SVC + GST < Total assume missing a field
+            if (comparison < 0) {
+                comparison = mSubTotal.compareTo(mTotal);
+                switch (comparison) {
+                    case 1: // SubTotal is bigger, assume error in sub total.
+                    case 0: // GST or SVC is already in item price
+                        mUseSubtotals = false;
+                        break;
+                    case -1: // SubTotal < Total
+                        amount = mTotal.subtract(sumOfTotals);
+                        percent = calculatePercent(amount, mTotal);
+
+                        // Maximum of both GST and SVC percentage, assume error
+                        if(percent > (fMaxGSTpercent + fMaxSVCpercent))
+                            break;
+
+                        if (isZero(mSVC)) {
+                            Log.d("infer SVC", amount.toString());
+                            mSVC = amount;
+                            mSVCpercent = percent;
+                        } else if (isZero(mGST)) {
+                            Log.d("infer GST", amount.toString());
+                            mGST = amount;
+                            mGSTpercent = percent;
+                        }// otherwise, assume we are missing an item.
+                        break;
+                    default: // other unknown error
+                        break;
+                }
+            } else if (comparison > 0) // assume GST and SVC is included in item price or other error
+                mUseSubtotals = false;
+        }
+
+        // Total or Sub Total equals to Sum of all items
+        BigDecimal total;
+        if(mUseSubtotals)
+            total = mSubTotal;
+        else
+            total = mTotal;
+
+        comparison = total.compareTo(sumOfItems);
+        if (comparison != 0) {
+            // check common error where gst or svc become itemized.
+            // because of font size or other formating
+            int lastItemIndex = mListOfAllItems.size()-1;
+            BigDecimal itemPrice = total.subtract(sumOfItems);
+            BigDecimal lastItemPrice;
+
+            // check that listOfAllItems is not empty
+            if(lastItemIndex < 0)
+                lastItemPrice = BigDecimal.ZERO;
+            else
+                lastItemPrice = mListOfAllItems.get(lastItemIndex).getPrice();
+
+            // if last item is the same value as what we subtract, remove item
+            if( isZero(itemPrice.add(lastItemPrice)) )
+                mListOfAllItems.remove(lastItemIndex);
+            else
+                getListOfAllItems().add(new Item("UNKNOWN ITEM", itemPrice));
+        }
+        Log.d("UseSubtotals", mUseSubtotals.toString());
+    }
+
+    private int calculatePercent(BigDecimal fracAmont, BigDecimal total){
+        BigDecimal percent;
+        percent = fracAmont.multiply(BigDecimal.valueOf(100));
+        percent = percent.divide(total, 0, BigDecimal.ROUND_HALF_EVEN);
+        return percent.intValue();
+    }
+
+    // Checks that the bill is balanced with 2 rules:
+    // Rule 1: total sum of price from listOfAllItems equals to the SubTotal(if present, Total otherwise)
+    // Rule 2: Sum of GST, SVC and SubTotal (if present) equals to the Total
+    public Boolean isBillBalanced(){
+        if (isZero(mTotal))
+            return false;
+        BigDecimal sumOfItems = sumOfItems();
+
+        if (mUseSubtotals){
+            if ( (mSubTotal.compareTo(sumOfItems) != 0))
+                return false;
+
+            if(mTotal.compareTo(sumOfTotals()) != 0)
+                return false;
+        }
+        else {
+            if (mTotal.compareTo(sumOfItems) != 0)
+                return false;
+        }
+
+        return true;
+    }
+
+    // returns the sum of GST, SVC, SubTotal and adjust.
+    private BigDecimal sumOfTotals(){
+        BigDecimal total = mSubTotal;
+        total = total.add(mGST);
+        total = total.add(mSVC);
+        total = total.add(mAdjust);
+        return total;
+    }
+
+    // Returns the sum of all items
+    private BigDecimal sumOfItems(){
+        BigDecimal total = new BigDecimal(0.00);
+        Iterator<Item> itemIterator = mListOfAllItems.iterator();
+
+        while (itemIterator.hasNext()){
+            total = total.add(itemIterator.next().getPrice());
+        }
+        Log.d("calculateTotal", total.toString());
+        return total;
+    }
+
+    // ******************* END BALANCING THE BILL ***************************
+
+    private Boolean isZero(BigDecimal bdAmount){
+        if(bdAmount.compareTo(BigDecimal.ZERO) == 0)
+            return  true;
+        return false;
     }
 }
