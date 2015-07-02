@@ -230,7 +230,7 @@ public class Bill {
             Log.d("WHITELIST", line);
         }
         else if(containsToken(fTOTAL_WORDS, line)){
-            if(getTotal().compareTo(BigDecimal.ZERO) == 0) {
+            if(getTotal().compareTo(BigDecimal.ZERO) > 0) {
                 // Cash line may have an associated change line.
                 // Skip if we already have our total.
                 if (containsToken(fCASH_WORDS, line))
@@ -615,7 +615,7 @@ public class Bill {
 
     // User clicked next or done, create new BillSplit ListItem
     public void splitTheBill (BillSplit.BillSplitType splitType) {
-        BillSplit billSplit = new BillSplit(splitType);
+        BillSplit billSplit = new BillSplit(splitType, getGuestTotal(mBillSplitNum), mNoOfPplSharing);
     }
 
     // User clicked prev, need to retrieve previous items and

@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.models.Bill;
-import wwckl.projectmiki.models.BillSplitter;
+import wwckl.projectmiki.models.BillSplit;
 import wwckl.projectmiki.models.Item;
 import wwckl.projectmiki.models.Receipt;
 
@@ -29,7 +29,7 @@ import wwckl.projectmiki.models.Receipt;
  */
 public class BillSplitterActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     final int fMAX_SHARING = 9;
-    private BillSplitter.BillSplitType mBillSplitType = BillSplitter.BillSplitType.DUTCH_TYPE;
+    private BillSplit.BillSplitType mBillSplitType = BillSplit.BillSplitType.DUTCH_TYPE;
     private Bill mBill;
     private int mNumOfItems = 0;
 
@@ -109,13 +109,13 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 startActivity(settingsIntent);
                 return true;
             case R.id.dutch:
-                swapSplitType(BillSplitter.BillSplitType.DUTCH_TYPE);
+                swapSplitType(BillSplit.BillSplitType.DUTCH_TYPE);
                 return true;
             case R.id.treat:
-                swapSplitType(BillSplitter.BillSplitType.TREAT_TYPE);
+                swapSplitType(BillSplit.BillSplitType.TREAT_TYPE);
                 return true;
             case R.id.share:
-                swapSplitType(BillSplitter.BillSplitType.SHARE_TYPE);
+                swapSplitType(BillSplit.BillSplitType.SHARE_TYPE);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -158,7 +158,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     // User clicked DONE button
     public void finishBillSplit(View view) {}
 
-    private void swapSplitType(BillSplitter.BillSplitType splitType){
+    private void swapSplitType(BillSplit.BillSplitType splitType){
         String billSplitString = getBillSplitString(splitType);
 
         mBillSplitType = splitType;
@@ -307,7 +307,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
 
         for (int i = 0; i < numOfSplits; i++) {
             String guestText;
-            BillSplitter billSplit = mBill.getListOfGuests().get(i);
+            BillSplit billSplit = mBill.getListOfGuests().get(i);
 
             switch ( billSplit.getSplitType() ) {
                 case DUTCH_TYPE:
@@ -322,7 +322,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         }
 
         BigDecimal amount = mBill.getGuestTotal(numOfSplits);
-        if ( mBillSplitType == BillSplitter.BillSplitType.DUTCH_TYPE )
+        if ( mBillSplitType == BillSplit.BillSplitType.DUTCH_TYPE )
             summaryText = summaryText + getString(R.string.guest) +" : $" +
                     amount.toString() + "\n";
         else {
@@ -337,7 +337,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         return Integer.parseInt((String) mShareSpinner.getSelectedItem());
     }
 
-    public String getBillSplitString(BillSplitter.BillSplitType splitType){
+    public String getBillSplitString(BillSplit.BillSplitType splitType){
         switch (splitType) {
             case DUTCH_TYPE:
             case TREAT_DUTCH_TYPE:
