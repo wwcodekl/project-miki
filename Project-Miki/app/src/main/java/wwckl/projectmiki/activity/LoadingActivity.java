@@ -61,19 +61,20 @@ public class LoadingActivity extends AppCompatActivity {
 
         // START thread to do back ground operations
         startOperation();
-
-        //Receipt.recognizedText = mRecognizedText;
-
-        // completed job. stop thread & hide progress bar
-        //startBillSplitting();
     }
 
+    // Loading Activity completed.
+    // hide progress bar and move to next activity.
     public void stopProgressBar(){
         mProgressBar.setVisibility(View.GONE);
 
+        // testing, display recognised text
         if(!mRecognizedText.isEmpty())
             mTextView.setText(mRecognizedText);
         mImageView.setVisibility(View.GONE);
+
+        //Receipt.recognizedText = mRecognizedText;
+        //startBillSplitting();
     }
 
     public void startBillSplitting(){
