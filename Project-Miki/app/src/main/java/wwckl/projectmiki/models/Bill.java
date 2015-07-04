@@ -29,9 +29,8 @@ public class Bill {
     private int mSVCpercent = 0;
     private BigDecimal mAdjust = new BigDecimal(0.00);
     private int mNoOfPplSharing = 0;
-    private int mBillSplitNum = 0;
     private List<Item> mListOfAllItems = new ArrayList<>();
-    private List<BillSplit> mListOfGuests = new ArrayList<>();
+    private List<BillSplit> mListOfBillSplits = new ArrayList<>();
     private Boolean mUseSubtotals = false; // whether to include subtotals in calculations.
 
     // hash words 'library'
@@ -57,7 +56,7 @@ public class Bill {
         fSUBTOTAL_WORDS.add("SUBTOT");
         //fSUBTOTAL_WORDS.add("SUBTOTAL");
         fSUBTOTAL_WORDS.add("SUB-TOT");
-        fSUBTOTAL_WORDS.add("SUB\u2014TOT"); // \u2014 is unicode representation of a long dash
+        //fSUBTOTAL_WORDS.add("SUB\u2014TOT"); // \u2014 is unicode representation of a long dash
         //fSUBTOTAL_WORDS.add("SUB-TOTAL");
         fSUBTOTAL_WORDS.add("SUBTTL");
         fSUBTOTAL_WORDS.add("STTL");
@@ -151,19 +150,17 @@ public class Bill {
         this.mNoOfPplSharing = noOfPplSharing;
     }
 
-    public int getBillSplitNum() {
-        return this.mBillSplitNum;
-    }
-
-    public void setBillSplitNum(int billSplitNum) {
-        this.mBillSplitNum = billSplitNum;
-    }
-
     public List<Item> getListOfAllItems() {
         return this.mListOfAllItems;
     }
 
-    public List<BillSplit> getListOfGuests() { return this.mListOfGuests; }
+    public List<BillSplit> getListOfBillSplits() {
+        return this.mListOfBillSplits;
+    }
+
+    public int getNumOfBillSplits() {
+        return mListOfBillSplits.size();
+    }
 
     // New Bill() initialisation method
     // parse receipt text and populate receipt values
@@ -186,8 +183,10 @@ public class Bill {
     private String cleanupOCRerrors(String receiptText){
         // we don't need question marks, assume 7
         receiptText = receiptText.replaceAll("\\?", "7");
+        // we don't need long dash either
+        receiptText = receiptText.replaceAll("\u2014", "-");
         // common ocr error, where picture has noise at edges
-        receiptText = receiptText.replaceAll("(?m)^[^A-Za-z0-9]+", "");
+        receiptText = receiptText.replaceAll("(?m)^[^A-Za-z0-9$]+", "");
         receiptText = receiptText.replaceAll("(?m)[^A-Za-z0-9]+$", "");
         // common ocr errors:
         receiptText = receiptText.replaceAll("Tota1", "Total");
@@ -207,7 +206,7 @@ public class Bill {
     }
 
     // ********************* PARSING OF RECEIPT ***************************
-
+    Boolean mIsPrevLineItem = false;
     // parse receipt line to match ether item amount, total, subtotal, gst or svc
     private void parseLine(String line){
         BigDecimal bdAmount;
@@ -215,11 +214,18 @@ public class Bill {
         // Get amount from line
         bdAmount = getAmount(line);
         if (bdAmount.compareTo(BigDecimal.ZERO) == 0) {
-            // line does not contain amount, skip
+            // line does not contain amount,
+            // check for description, otherwise skip
+            if(mIsPrevLineItem && goodDesc(line) && (!mListOfAllItems.isEmpty()) && isZero(getTotal())){
+                Item item = mListOfAllItems.get(mListOfAllItems.size() - 1);
+                if(!goodDesc(item.getDescription()))
+                    item.setDescription(line);
+            }
             Log.d("parseLine", line);
             return;
         }
         Log.d("amount", bdAmount.toString());
+        mIsPrevLineItem = false;
 
         // check for different tokens
         if(containsToken(fSUBTOTAL_WORDS, line)){
@@ -270,6 +276,7 @@ public class Bill {
             for (int i = 0; i < qty; i++) {
                 mListOfAllItems.add(new Item(desc, amount));
             }
+            mIsPrevLineItem = true;
         }
     }
 
@@ -279,7 +286,7 @@ public class Bill {
         String strAmount;
 
         // prep string, remove common ocr mistakes of various symbols in amount
-        strAmount = line.replaceAll("([0-9][ ]?)[^0-9 ]([ ]?[0-9])$", "$1.$2");
+        strAmount = line.replaceAll("([0-9][ ]?)[- ',_]([ ]?[0-9][0-9])$", "$1.$2");
         //Log.d("strAmount 0", strAmount);
 
         // receipts tend to have bigger font size of total amount
@@ -378,6 +385,16 @@ public class Bill {
 
         Log.d("percent", String.valueOf(percentage));
         return percentage;
+    }
+
+    // Quick check for good description or not
+    private Boolean goodDesc(String line) {
+        if(line.length() < 2)
+            return false;
+        String strNonAlpha = line.replaceAll("[A-za-z]+", "");
+        String strAlphabets = line.replaceAll("[^A-Za-z]+", "");
+
+        return (strAlphabets.length() > strNonAlpha.length()) ? true : false;
     }
 
     // ********************* END PARSING OF RECEIPT ************************
@@ -579,7 +596,7 @@ public class Bill {
         Item item = mListOfAllItems.get(itemIndex);
 
         if(checked)
-            item.setGuestIndex(mBillSplitNum);
+            item.setGuestIndex(mListOfBillSplits.size());
         else
             item.setGuestIndex(item.fNOT_SELECTED);
     }
@@ -587,13 +604,16 @@ public class Bill {
     // return total of selected item's price by guest, no Split type calculations
     public BigDecimal getGuestTotal(int guestIndex) {
         BigDecimal total = new BigDecimal(0.00);
+        Iterator iterator = mListOfAllItems.iterator();
 
-        for (int i = 0; i < mListOfAllItems.size(); i++) {
-            if(mListOfAllItems.get(i).getGuestIndex() == guestIndex) {
-                BigDecimal itemPrice = mListOfAllItems.get(i).getPrice();
+        while (iterator.hasNext()){
+            Item item = (Item) iterator.next();
+            if(item.getGuestIndex() == guestIndex) {
+                BigDecimal itemPrice = item.getPrice();
                 total = total.add(itemPrice);
             }
         }
+
         if (mUseSubtotals) {
             // Add GST
             if (mGSTpercent > 0) {
@@ -613,12 +633,13 @@ public class Bill {
         return total;
     }
 
-    // User clicked next or done, create new BillSplit ListItem
-    public void splitTheBill (BillSplit.BillSplitType splitType) {
-        BillSplit billSplit = new BillSplit(splitType, getGuestTotal(mBillSplitNum), mNoOfPplSharing);
+    // No error checking on data, assume all above board by this point.
+    public void addBillSplit(BillSplit billSplit) {
+        mListOfBillSplits.add(billSplit);
     }
 
-    // User clicked prev, need to retrieve previous items and
-    // delete last BillSplit item.
-    public void backTrack () {}
+    public void removeLastBillSplit() {
+        if(mListOfBillSplits.size() > 0)
+            mListOfBillSplits.remove(mListOfBillSplits.size()-1);
+    }
 }

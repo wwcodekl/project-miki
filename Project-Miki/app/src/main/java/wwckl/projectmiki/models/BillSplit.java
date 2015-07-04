@@ -1,8 +1,8 @@
 package wwckl.projectmiki.models;
 
+import android.util.Log;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Aryn on 6/29/15.
@@ -18,25 +18,24 @@ public class BillSplit {
 
     private BillSplitType mSplitType = BillSplitType.DUTCH_TYPE;
     private BigDecimal mSplitAmount = new BigDecimal(0.00);
-    private BigDecimal mTreatAmount = new BigDecimal(0.00);
-    private BigDecimal mShareAmount = new BigDecimal(0.00);
+    //private BigDecimal mTreatAmount = new BigDecimal(0.00);
+    //private BigDecimal mShareAmount = new BigDecimal(0.00);
     private int mNoOfPplSharing = 0;
-    private List<Item> listOfItems = new ArrayList<Item>(); // List of items selected.
 
-    public BillSplitType getSplitType() { return mSplitType; }
-
-    // new BillSplit() initialisation method.
-    public BillSplit (BigDecimal dutchTotal) {
-        mSplitType = BillSplitType.DUTCH_TYPE;
-        mSplitAmount = dutchTotal;
-    }
-
-    // FOR SHARE OR TREAT OPTIONS
+    // new BillSplit
     public BillSplit (BillSplitType splitType, BigDecimal shareTotal, int noOfPplSharing) {
         mSplitType = splitType;
         mSplitAmount = shareTotal;
         mNoOfPplSharing = noOfPplSharing;
+        Log.d("new BillSplit", getSplitString(splitType) + "," +
+                mSplitAmount.toString() + "," + Integer.toString(mNoOfPplSharing));
     }
+
+    public BillSplitType getSplitType() { return mSplitType; }
+
+    public int getNoOfPplSharing () { return mNoOfPplSharing; }
+
+    public BigDecimal getTotalAmount () { return mSplitAmount; }
 
     // TODO: CALCULATE SPLIT AMOUNT ACCORDINGLY.
     public BigDecimal getSplitAmount() {
@@ -48,13 +47,12 @@ public class BillSplit {
         switch (mSplitType) {
             case SHARE_TYPE:
             case TREAT_TYPE:
+            case TREAT_SHARE_TYPE:
                 if(mNoOfPplSharing != 0)
                     amount = mSplitAmount.divide(BigDecimal.valueOf(mNoOfPplSharing),
                                 2, BigDecimal.ROUND_HALF_EVEN);
                 break;
             case TREAT_DUTCH_TYPE:
-            case TREAT_SHARE_TYPE:
-                break;
             case DUTCH_TYPE:
             default:
                 break;
@@ -63,9 +61,26 @@ public class BillSplit {
         return amount;
     }
 
-    private Boolean isZero(BigDecimal bdAmount){
+    public Boolean isZero(BigDecimal bdAmount){
         if(bdAmount.compareTo(BigDecimal.ZERO) == 0)
             return  true;
         return false;
+    }
+
+    private String getSplitString(BillSplitType splitType) {
+        switch (splitType) {
+            case DUTCH_TYPE:
+                return "DUTCH";
+            case SHARE_TYPE:
+                return "SHARE";
+            case TREAT_TYPE:
+                return "TREAT";
+            case TREAT_DUTCH_TYPE:
+                return "TREAT DUTCH";
+            case TREAT_SHARE_TYPE:
+                return "TREAT SHARE";
+            default:
+                return splitType.toString();
+        }
     }
 }

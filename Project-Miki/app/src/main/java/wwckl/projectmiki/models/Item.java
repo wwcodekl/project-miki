@@ -7,7 +7,7 @@ import java.util.Objects;
  * Created by cheeyim on 2/2/2015.
  */
 public class Item {
-    final int fNOT_SELECTED = 1;
+    public final int fNOT_SELECTED = -1;
 
     private String description;
     private BigDecimal price;

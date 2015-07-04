@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -23,8 +24,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/select_all"
                 android:id="@+id/cbSelectAll"
-                android:onClick="onSelectAllChkBoxClicked"
-                android:nestedScrollingEnabled="false" />
+                android:onClick="onSelectAllChkBoxClicked"/>
         </LinearLayout>
     </ScrollView>
 
@@ -70,15 +70,34 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"/>
     </RelativeLayout>
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:id="@+id/scrollSummary"
+        android:layout_weight="0.2"
+        android:fadeScrollbars="false"
+        android:scrollbarStyle="outsideInset">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <fragment
+                android:id="@+id/summaryFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                class="wwckl.projectmiki.fragment.SummaryFragment"
+                tools:layout="@layout/fragment_summary"/>
+        </LinearLayout>
+    </ScrollView>
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
         android:fadeScrollbars="false"
-        android:id="@+id/layoutSummary">
-
+        android:id="@+id/layoutSummary"
+        android:layout_gravity="center">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -100,10 +119,11 @@
             android:id="@+id/tvSummary"/>
     </LinearLayout>
 
-    <RelativeLayout
-        android:id="@+id/layoutButtons"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="center">
         <Button
             android:id="@+id/button_prev"
             android:layout_width="wrap_content"
@@ -111,28 +131,22 @@
             android:text="@string/prev"
             android:clickable="true"
             android:onClick="previousGuest"
-            android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@+id/button_next"
-            android:layout_toStartOf="@+id/button_next" />
+            android:visibility="gone"/>
         <Button
             android:id="@+id/button_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/next"
             android:clickable="true"
-            android:onClick="nextGuest"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
+            android:onClick="nextGuest"/>
         <Button
             android:id="@+id/button_done"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/done"
             android:clickable="true"
-            android:onClick="finishBillSplit"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/button_next"
-            android:layout_toEndOf="@+id/button_next" />
-    </RelativeLayout>
+            android:onClick="finishBillSplit"/>
+
+    </LinearLayout>
 
 </LinearLayout>

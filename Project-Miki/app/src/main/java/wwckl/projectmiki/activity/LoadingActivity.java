@@ -30,7 +30,7 @@ import wwckl.projectmiki.models.Receipt;
  */
 public class LoadingActivity extends AppCompatActivity {
     private Bitmap mReceiptPicture = null;
-    private String mRecognizedText = "start";
+    private String mRecognizedText = "Error 404: Not found";
 
     private ImageView mImageView;
     private ProgressBar mProgressBar;
@@ -51,6 +51,8 @@ public class LoadingActivity extends AppCompatActivity {
 
         // Set receipt image in background.
         mReceiptPicture = Receipt.getReceiptBitmap();
+        if(mReceiptPicture == null)
+            super.finish();
 
         mImageView = (ImageView) findViewById(R.id.imageViewLoading);
         mImageView.setImageBitmap(mReceiptPicture);
@@ -89,7 +91,11 @@ public class LoadingActivity extends AppCompatActivity {
         mThread = new Thread(new Runnable() {
             public void run() {
                 // start Tesseract thread to detect text.
-                TesseractDetectText();
+                try {
+                    TesseractDetectText();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 // Post message to handler to signal complete operation
                 mHandler.sendEmptyMessage(0);
@@ -98,7 +104,7 @@ public class LoadingActivity extends AppCompatActivity {
         mThread.start();
     }
 
-    public void TesseractDetectText() {
+    public void TesseractDetectText() throws InterruptedException {
         // create tessdata directory
         File tessDir = new File(Environment.getExternalStorageDirectory().getPath() + "/tessdata");
         if (!tessDir.exists()) {
