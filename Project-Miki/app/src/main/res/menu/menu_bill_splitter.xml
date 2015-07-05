@@ -3,7 +3,16 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="wwckl.projectmiki.activity.BillSplitterActivity">
     <item android:id="@+id/action_settings"
-          android:title="@string/action_settings"
-          android:orderInCategory="100"
-          app:showAsAction="never"/>
+        android:title="@string/action_settings"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+    <item android:id="@+id/dutch"
+          android:title="@string/dutch"
+          app:showAsAction="always|withText"/>
+    <item android:id="@+id/treat"
+          android:title="@string/treat"
+          app:showAsAction="always|withText"/>
+    <item android:id="@+id/share"
+          android:title="@string/share"
+          app:showAsAction="always|withText"/>
 </menu>

@@ -12,11 +12,4 @@
         android:entries="@array/pref_input_method"
         android:entryValues="@array/pref_input_method_values"
         android:defaultValue="@string/gallery" />
-    <PreferenceCategory android:title="@string/camera">
-        <CheckBoxPreference
-            android:key="pref_auto_focus"
-            android:title="@string/pref_auto_focus"
-            android:summary="@string/pref_summ_auto_focus"
-            android:defaultValue="true" />
-    </PreferenceCategory>
 </PreferenceScreen>

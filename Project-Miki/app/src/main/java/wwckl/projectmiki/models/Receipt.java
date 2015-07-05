@@ -2,68 +2,27 @@ package wwckl.projectmiki.models;
 
 import android.graphics.Bitmap;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by cheeyim on 2/2/2015.
  */
 public class Receipt {
     // Receipt image
-    public static Bitmap receiptBitmap = null;
-    public static String recognizedText;
-    private Double total;
-    private Double subTotal;
-    private int noOfPplSharing;
-    private List<Item> listOfAllItems = new ArrayList<Item>();
-    private List<Item> listOfSelectedItems = new ArrayList<Item>();
-    private List<Item> listOfRemainingItems = new ArrayList<Item>();
+    private static Bitmap mReceiptBitmap = null;
+    private static String mRecognizedText;
 
-    public Double getTotal() {
-        return total;
+    public static Bitmap getReceiptBitmap() {
+        return mReceiptBitmap;
     }
 
-    public void setTotal(Double total) {
-        this.total = total;
+    public static void setReceiptBitmap(Bitmap receiptBitmap){
+        mReceiptBitmap = receiptBitmap;
     }
 
-    public Double getSubTotal() {
-        return subTotal;
+    public static String getRecognizedText(){
+        return mRecognizedText;
     }
 
-    public void setSubTotal(Double subTotal) {
-        this.subTotal = subTotal;
-    }
-
-    public int getNoOfPplSharing() {
-        return noOfPplSharing;
-    }
-
-    public void setNoOfPplSharing(int noOfPplSharing) {
-        this.noOfPplSharing = noOfPplSharing;
-    }
-
-    public List<Item> getListOfAllItems() {
-        return listOfAllItems;
-    }
-
-    public void setListOfAllItems(List<Item> listOfAllItems) {
-        this.listOfAllItems = listOfAllItems;
-    }
-
-    public List<Item> getListOfSelectedItems() {
-        return listOfSelectedItems;
-    }
-
-    public void setListOfSelectedItems(List<Item> listOfSelectedItems) {
-        this.listOfSelectedItems = listOfSelectedItems;
-    }
-
-    public List<Item> getListOfRemainingItems() {
-        return listOfRemainingItems;
-    }
-
-    public void setListOfRemainingItems(List<Item> listOfRemainingItems) {
-        this.listOfRemainingItems = listOfRemainingItems;
+    public static void setRecognizedText(String recognizedText) {
+        mRecognizedText = recognizedText;
     }
 }

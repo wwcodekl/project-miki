@@ -30,7 +30,7 @@ import wwckl.projectmiki.models.Receipt;
  */
 public class LoadingActivity extends AppCompatActivity {
     private Bitmap mReceiptPicture = null;
-    private String mRecognizedText = "start";
+    private String mRecognizedText = "Error 404: Not found";
 
     private ImageView mImageView;
     private ProgressBar mProgressBar;
@@ -50,7 +50,9 @@ public class LoadingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_loading);
 
         // Set receipt image in background.
-        mReceiptPicture = Receipt.receiptBitmap;
+        mReceiptPicture = Receipt.getReceiptBitmap();
+        if(mReceiptPicture == null)
+            super.finish();
 
         mImageView = (ImageView) findViewById(R.id.imageViewLoading);
         mImageView.setImageBitmap(mReceiptPicture);
@@ -73,12 +75,12 @@ public class LoadingActivity extends AppCompatActivity {
             mTextView.setText(mRecognizedText);
         mImageView.setVisibility(View.GONE);
 
-        //Receipt.recognizedText = mRecognizedText;
-        //startBillSplitting();
+        // Store receipt text
+        Receipt.setRecognizedText(mRecognizedText);
+        startBillSplitting();
     }
 
     public void startBillSplitting(){
-        // TODO: STORE RECEIPT RESULT?
         Intent intent = new Intent(this, BillSplitterActivity.class);
         startActivity(intent);
     }
@@ -89,9 +91,11 @@ public class LoadingActivity extends AppCompatActivity {
         mThread = new Thread(new Runnable() {
             public void run() {
                 // start Tesseract thread to detect text.
-                TesseractDetectText();
-
-                // TODO: CLEAN UP DATA
+                try {
+                    TesseractDetectText();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 // Post message to handler to signal complete operation
                 mHandler.sendEmptyMessage(0);
@@ -100,7 +104,7 @@ public class LoadingActivity extends AppCompatActivity {
         mThread.start();
     }
 
-    public void TesseractDetectText() {
+    public void TesseractDetectText() throws InterruptedException {
         // create tessdata directory
         File tessDir = new File(Environment.getExternalStorageDirectory().getPath() + "/tessdata");
         if (!tessDir.exists()) {
@@ -132,7 +136,7 @@ public class LoadingActivity extends AppCompatActivity {
         }
 
         TessBaseAPI tessBaseAPI = new TessBaseAPI();
-        tessBaseAPI.setDebug(true);
+        //tessBaseAPI.setDebug(true);
         tessBaseAPI.init(path, lang); //Init the Tess with the trained data file, with english language
 
         // Set the Receipt image
