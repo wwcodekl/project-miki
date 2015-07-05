@@ -42,6 +42,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     private Button mButtonPrev;
     private Button mButtonNext;
     private Button mButtonDone;
+    private CheckBox mSelectAllCheckBox;
     private LinearLayout mItemizedLayout;
     private RelativeLayout mTotalsLayout;
     private LinearLayout mSummaryLayout;
@@ -61,6 +62,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         setContentView(R.layout.activity_bill_splitter);
 
         // Get the various layout objects
+        mSelectAllCheckBox = (CheckBox)findViewById(R.id.cbSelectAll);
         mItemizedLayout = (LinearLayout)findViewById(R.id.layoutItemized);
         mSvcTextView = (TextView)findViewById(R.id.tvSVC);
         mGstTextView = (TextView)findViewById(R.id.tvGST);
@@ -237,6 +239,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             //mSummaryFragment.largeView();
             mTotalsLayout.setVisibility(View.GONE);
             mSummaryLayout.setVisibility(View.GONE);
+            mSelectAllCheckBox.setVisibility(View.GONE);
         }
         else if (mBill.getNumOfBillSplits() == 0) {
             mButtonPrev.setVisibility(View.INVISIBLE);
@@ -245,6 +248,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             //mSummaryFragment.smallView();
             mTotalsLayout.setVisibility(View.VISIBLE);
             mSummaryLayout.setVisibility(View.VISIBLE);
+            mSelectAllCheckBox.setVisibility(View.VISIBLE);
         }
         else {
             mButtonPrev.setVisibility(View.VISIBLE);
@@ -253,6 +257,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             //mSummaryFragment.smallView();
             mTotalsLayout.setVisibility(View.VISIBLE);
             mSummaryLayout.setVisibility(View.VISIBLE);
+            mSelectAllCheckBox.setVisibility(View.VISIBLE);
         }
     }
 
