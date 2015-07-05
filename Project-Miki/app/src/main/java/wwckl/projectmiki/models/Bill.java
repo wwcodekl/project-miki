@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +31,7 @@ public class Bill {
     private BigDecimal mAdjust = new BigDecimal(0.00);
     private int mNoOfPplSharing = 0;
     private List<Item> mListOfAllItems = new ArrayList<>();
-    private List<BillSplit> mListOfBillSplits = new ArrayList<>();
+    private Stack<BillSplit> mBillSplitStack = new Stack<>();
     private Boolean mUseSubtotals = false; // whether to include subtotals in calculations.
 
     // hash words 'library'
@@ -154,12 +155,12 @@ public class Bill {
         return this.mListOfAllItems;
     }
 
-    public List<BillSplit> getListOfBillSplits() {
-        return this.mListOfBillSplits;
+    public Stack<BillSplit> getBillSplits() {
+        return this.mBillSplitStack;
     }
 
     public int getNumOfBillSplits() {
-        return mListOfBillSplits.size();
+        return mBillSplitStack.size();
     }
 
     // New Bill() initialisation method
@@ -596,7 +597,7 @@ public class Bill {
         Item item = mListOfAllItems.get(itemIndex);
 
         if(checked)
-            item.setGuestIndex(mListOfBillSplits.size());
+            item.setGuestIndex(mBillSplitStack.size());
         else
             item.setGuestIndex(item.fNOT_SELECTED);
     }
@@ -635,11 +636,23 @@ public class Bill {
 
     // No error checking on data, assume all above board by this point.
     public void addBillSplit(BillSplit billSplit) {
-        mListOfBillSplits.add(billSplit);
+        mBillSplitStack.push(billSplit);
     }
 
-    public void removeLastBillSplit() {
-        if(mListOfBillSplits.size() > 0)
-            mListOfBillSplits.remove(mListOfBillSplits.size()-1);
+    public BillSplit removeLastBillSplit() {
+        BillSplit lastBillSplit = null;
+
+        if(!mBillSplitStack.empty()) {
+            lastBillSplit = mBillSplitStack.pop();
+            // get rid of selected items
+            int billSplitSize = getNumOfBillSplits();
+            Iterator<Item> itemIterator = mListOfAllItems.iterator();
+            while (itemIterator.hasNext()) {
+                Item item = itemIterator.next();
+                if( item.getGuestIndex() > billSplitSize )
+                    item.setGuestIndex(item.fNOT_SELECTED);
+            }
+        }
+        return lastBillSplit;
     }
 }

@@ -1,7 +1,5 @@
 package wwckl.projectmiki.activity;
 
-import android.app.ActionBar;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +43,8 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     private Button mButtonNext;
     private Button mButtonDone;
     private LinearLayout mItemizedLayout;
+    private RelativeLayout mTotalsLayout;
+    private LinearLayout mSummaryLayout;
     private TextView mSvcTextView;
     private TextView mGstTextView;
     private TextView mSubTotalTextView;
@@ -70,11 +71,12 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         mSummaryFragment = (SummaryFragment) getFragmentManager().findFragmentById(R.id.summaryFragment);
         mButtonNext = (Button)findViewById(R.id.button_next);
         mButtonDone = (Button)findViewById(R.id.button_done);
+        mTotalsLayout = (RelativeLayout) findViewById(R.id.layoutTotals);
+        mSummaryLayout = (LinearLayout) findViewById(R.id.layoutSummary);
 
         // Prev button should be disabled for 1st Guest
         mButtonPrev = (Button)findViewById(R.id.button_prev);
         mButtonPrev.setVisibility(View.INVISIBLE);
-        //mButtonPrev.setEnabled(false);
 
         // Set up share among drop down spinner
         mShareSpinner = (Spinner)findViewById(R.id.spinnerSharing);
@@ -161,48 +163,43 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
 
     // Clicked previous button
     public void previousGuest(View view) {
-        mSummaryFragment.prevBillSplit();
-        mBill.removeLastBillSplit();
-        updateSummary();
-        if(mBill.getNumOfBillSplits() == 0) {
-            mButtonPrev.setVisibility(View.INVISIBLE);
+        BillSplit lastBillSplit = mBill.removeLastBillSplit();
+
+        if(lastBillSplit == null)
+            return;
+
+        mSummaryFragment.prevBillSplit(lastBillSplit);
+
+        // if TREAT_SHARE or TREAT_DUTCH, we have no easy way to recalculate TREAT amount pax.
+        // Simpler to back track all the way to last TREAT_TYPE
+        while ((lastBillSplit.getSplitType() == BillSplit.BillSplitType.TREAT_SHARE_TYPE) ||
+                (lastBillSplit.getSplitType() == BillSplit.BillSplitType.TREAT_DUTCH_TYPE))
+        {
+            lastBillSplit = mBill.removeLastBillSplit();
+            if(lastBillSplit == null) // this line of code should not be triggered
+                return;
+            mSummaryFragment.prevBillSplit(lastBillSplit);
         }
-        mButtonNext.setVisibility(View.VISIBLE);
-        mButtonDone.setText(getString(R.string.done));
+
+        mBillSplitType = lastBillSplit.getSplitType();
+        updateCheckBoxes();
+        updateSummary();
+        updateButtons();
+        updateMenuButtons(mBillSplitType);
     }
 
     // User clicked next button
     public void nextGuest(View view) {
         int numOfSplits = mBill.getNumOfBillSplits();
-        int numOfUnselectedItems = 0;
         BillSplit billSplit = mSummaryFragment.nextBillSplit(mBillSplitType,
                 mBill.getGuestTotal(numOfSplits), getNumOfSharing());
 
         if (billSplit != null) {
-            // disable checked items
-            Iterator iterator = mBill.getListOfAllItems().iterator();
-            int id = 0;
-            CheckBox checkBox;
-            while(iterator.hasNext()){
-                Item item = (Item)iterator.next();
-                if (item.getGuestIndex() == numOfSplits) {
-                    checkBox = (CheckBox) mItemizedLayout.findViewById(id);
-                    checkBox.setEnabled(false);
-                }
-                else if (item.getGuestIndex() == item.fNOT_SELECTED){
-                    numOfUnselectedItems++;
-                }
-                id++;
-            }
             // Add new BillSplit to mBill
             mBill.addBillSplit(billSplit);
+            updateCheckBoxes();
             updateSummary();
-            mButtonPrev.setVisibility(View.VISIBLE);
-            if(numOfUnselectedItems == 0){
-                mButtonNext.setVisibility(View.INVISIBLE);
-                mButtonDone.setText(getString(R.string.new_));
-            }
-
+            updateButtons();
             // Default to TREAT_DUTCH_TYPE if click next on TREAT
             updateMenuButtons(mBillSplitType);
         }
@@ -214,10 +211,74 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         if (getString(R.string.new_).contentEquals(mButtonDone.getText()))
             newBill();
         else {
-
+            // Check all remaining items automatically
+            setCheckAll(true);
+            // then new billSplit
+            nextGuest(view);
         }
     }
 
+    // should be called after updateCheckBoxes.
+    private void updateButtons() {
+        int numOfCalculatedItems = 0;
+
+        for (int i = 0; i < mBill.getListOfAllItems().size(); i++) {
+            CheckBox checkBox = (CheckBox) mItemizedLayout.findViewById(i);
+            if (!checkBox.isEnabled())
+                numOfCalculatedItems++;
+        }
+
+        if ((numOfCalculatedItems == mBill.getListOfAllItems().size()) &&
+                (mSummaryFragment.getRemainingNumOfPplTreating() == 0)) {
+            mButtonPrev.setVisibility(View.VISIBLE);
+            mButtonNext.setVisibility(View.INVISIBLE);
+            mButtonDone.setText(getString(R.string.new_));
+            // Completed Bill split, blow up summary
+            //mSummaryFragment.largeView();
+            mTotalsLayout.setVisibility(View.GONE);
+            mSummaryLayout.setVisibility(View.GONE);
+        }
+        else if (mBill.getNumOfBillSplits() == 0) {
+            mButtonPrev.setVisibility(View.INVISIBLE);
+            mButtonNext.setVisibility(View.VISIBLE);
+            mButtonDone.setText(getString(R.string.done));
+            //mSummaryFragment.smallView();
+            mTotalsLayout.setVisibility(View.VISIBLE);
+            mSummaryLayout.setVisibility(View.VISIBLE);
+        }
+        else {
+            mButtonPrev.setVisibility(View.VISIBLE);
+            mButtonNext.setVisibility(View.VISIBLE);
+            mButtonDone.setText(getString(R.string.done));
+            //mSummaryFragment.smallView();
+            mTotalsLayout.setVisibility(View.VISIBLE);
+            mSummaryLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    // update checkboxes, e.g. re-enable checkboxes onClick button Prev
+    private void updateCheckBoxes () {
+        Iterator<Item> iterator = mBill.getListOfAllItems().iterator();
+        int numOfBillSplits = mBill.getNumOfBillSplits();
+        int id = 0;
+
+        while (iterator.hasNext()) {
+            Item item = iterator.next();
+            CheckBox checkBox = (CheckBox) mItemizedLayout.findViewById(id);
+            if (item.getGuestIndex() == item.fNOT_SELECTED) {
+                checkBox.setEnabled(true);
+                checkBox.setChecked(false);
+            }
+            else if (item.getGuestIndex() >= numOfBillSplits) {
+                checkBox.setEnabled(true);
+            }
+            else
+                checkBox.setEnabled(false);
+            id++;
+        }
+    }
+
+    // for when user select New button
     public void newBill() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -231,8 +292,17 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     }
 
     // When shifting from one type of BillSplit type to another.
+    // Should be done after updateButtons()
     private void updateMenuButtons(BillSplit.BillSplitType splitType) {
-        // Update type if active TREAT type Change Split type accordingly.
+        // IF updateButtons has set mButtonDone to new, no more bill splitting
+        if (getString(R.string.new_).contentEquals(mButtonDone.getText())) {
+            mMenuItemDutch.setEnabled(false);
+            mMenuItemTreat.setEnabled(false);
+            mMenuItemShare.setEnabled(false);
+            return;
+        }
+
+            // Update type if active TREAT type Change Split type accordingly.
         if (mSummaryFragment.getRemainingNumOfPplTreating() > 0) {
             if(splitType == BillSplit.BillSplitType.SHARE_TYPE )
                 mBillSplitType = BillSplit.BillSplitType.TREAT_SHARE_TYPE;
@@ -416,7 +486,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 if (remaingNumOfPplSharing > 0) {
                     amount = amount.add(mSummaryFragment.getTreatAmountPax());
                 }
-                summaryText = getString(R.string.guest) +" : $" + amount.toString() + "\n";
+                summaryText = getString(R.string.guest) +" : $" + amount.toString();
                 break;
             case TREAT_SHARE_TYPE:
             case SHARE_TYPE:
@@ -424,7 +494,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                     amount = amount.add(mSummaryFragment.getTreatAmountPax().multiply(BigDecimal.valueOf(remaingNumOfPplSharing)));
                 }
             case TREAT_TYPE:
-                summaryText = getString(R.string.guest) + "s : $" + amount + "\n";
+                summaryText = getString(R.string.guest) + "s : $" + amount.toString();
                 break;
             default:
                 break;

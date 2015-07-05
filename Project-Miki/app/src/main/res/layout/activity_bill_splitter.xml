@@ -12,7 +12,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:id="@+id/scrollItemized"
-        android:layout_weight="0.5"
+        android:layout_weight="20"
         android:fadeScrollbars="false">
         <LinearLayout
             android:orientation="vertical"
@@ -31,7 +31,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/layoutTotals">
+        android:id="@+id/layoutTotals"
+        android:layout_weight="2">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -74,7 +75,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:id="@+id/scrollSummary"
-        android:layout_weight="0.2"
+        android:layout_weight="20"
         android:fadeScrollbars="false"
         android:scrollbarStyle="outsideInset">
         <LinearLayout
@@ -94,27 +95,30 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical"
-        android:fadeScrollbars="false"
         android:id="@+id/layoutSummary"
-        android:layout_gravity="center">
+        android:gravity="center_horizontal"
+        android:layout_weight="1">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/primary_dark_material_dark"
             android:text="@string/dutch"
             android:id="@+id/tvSplitType" />
 
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/primary_dark_material_dark"
             android:id="@+id/spinnerSharing"
-            android:visibility="gone"/>
+            android:visibility="invisible"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/primary_dark_material_dark"
             android:text="@string/guest"
             android:id="@+id/tvSummary"/>
     </LinearLayout>
@@ -123,7 +127,9 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center">
+        android:gravity="center"
+        android:layout_weight="2"
+        android:padding="0dp">
         <Button
             android:id="@+id/button_prev"
             android:layout_width="wrap_content"

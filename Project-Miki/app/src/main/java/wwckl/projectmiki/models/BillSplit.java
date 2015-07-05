@@ -18,8 +18,6 @@ public class BillSplit {
 
     private BillSplitType mSplitType = BillSplitType.DUTCH_TYPE;
     private BigDecimal mSplitAmount = new BigDecimal(0.00);
-    //private BigDecimal mTreatAmount = new BigDecimal(0.00);
-    //private BigDecimal mShareAmount = new BigDecimal(0.00);
     private int mNoOfPplSharing = 0;
 
     // new BillSplit

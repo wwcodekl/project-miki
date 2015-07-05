@@ -1,7 +1,6 @@
 package wwckl.projectmiki.fragment;
 
 import android.app.Fragment;
-import android.graphics.drawable.DrawableContainer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -12,11 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 import wwckl.projectmiki.R;
-import wwckl.projectmiki.activity.BillSplitterActivity;
 import wwckl.projectmiki.models.BillSplit;
 
 /**
@@ -76,9 +72,6 @@ public class SummaryFragment extends Fragment {
                     // set New share amount
                     amount = amount.add(mTreatAmountPax);
                     mNumOfPplTreating--;
-                    // check if we can clear Treat amount per person.
-                    if(mNumOfPplTreating == 0)
-                        mTreatAmountPax = BigDecimal.ZERO;
                 }
                 // else, no change needed.
                 mTotalNumOfPpl++;
@@ -95,16 +88,12 @@ public class SummaryFragment extends Fragment {
                     // set New share amount
                     amount = amount.add(mTreatAmountPax.multiply(BigDecimal.valueOf(mNumOfPplTreating)));
                     mNumOfPplTreating = mNumOfPplTreating - pax;
-                    // check if we can clear Treat amount per person.
-                    if(mNumOfPplTreating == 0)
-                        mTreatAmountPax = BigDecimal.ZERO;
                 }
                 else if (mNumOfPplTreating != 0) {
                     // set billsplit type to TREAT_SHARE_TYPE
                     splitType = BillSplit.BillSplitType.TREAT_SHARE_TYPE;
                     // share pax > mNumOfPplTreating, calculate new amount
                     amount = amount.add(mTreatAmountPax.multiply(BigDecimal.valueOf(mNumOfPplTreating)));
-                    mTreatAmountPax = BigDecimal.ZERO;
                     mNumOfPplTreating = 0;
                 }
                 // else, no change needed.
@@ -132,6 +121,10 @@ public class SummaryFragment extends Fragment {
 
         // Add summary text of new bill split to fragment
         addSummaryText(newBillSplit);
+        // check if we can clear Treat amount per person.
+        // Do this only after we have added Summary Text
+        if(mNumOfPplTreating == 0)
+            mTreatAmountPax = BigDecimal.ZERO;
 
         // return new billSplit to be added to Bill.BillSplit array
         return newBillSplit;
@@ -139,9 +132,31 @@ public class SummaryFragment extends Fragment {
 
     // User clicked prev, need to retrieve previous items and
     // delete last BillSplit item.
-    public void prevBillSplit () {
+    public void prevBillSplit (BillSplit lastBillSplit) {
+        if (lastBillSplit == null)
+            return;
+
         mNumOfTextView--;
         mLinearLayout.removeViewAt(mNumOfTextView);
+        switch (lastBillSplit.getSplitType()) {
+            case TREAT_DUTCH_TYPE:
+                mNumOfPplTreating++;
+            case DUTCH_TYPE:
+                mTotalNumOfPpl--;
+                break;
+
+            case TREAT_SHARE_TYPE:
+                mNumOfPplTreating = mNumOfPplTreating - lastBillSplit.getNoOfPplSharing();
+            case SHARE_TYPE:
+                mTotalNumOfPpl = mTotalNumOfPpl - lastBillSplit.getNoOfPplSharing();
+                break;
+
+            case TREAT_TYPE:
+                mNumOfPplTreating = 0;
+                mTreatAmountPax = BigDecimal.ZERO;
+                mTotalNumOfPpl--;
+                break;
+        }
     }
 
     private void addSummaryText (BillSplit billSplit) {
@@ -150,25 +165,29 @@ public class SummaryFragment extends Fragment {
         BigDecimal amount = billSplit.getTotalAmount();
         TextView summaryTextView = new TextView(getActivity());
 
-        // Get SummaryText
+        // Build SummaryText
         switch (billSplit.getSplitType()) {
-            case DUTCH_TYPE:
             case TREAT_DUTCH_TYPE:
-                summaryText = treatTypeText + "\t\t\t\t" + getString(R.string.guest) + " " +
-                        (mNumOfTextView+1) + " :\t$" + amount.toString();
+                summaryText = "T-";
+                //summaryText = getBillSplitString(BillSplit.BillSplitType.TREAT_TYPE) + " ($" + mTreatAmountPax.toString() + ") ";
+            case DUTCH_TYPE:
+                summaryText = summaryText + treatTypeText + "\t" + getString(R.string.guest) + " " +
+                        mTotalNumOfPpl + " : $" + amount.toString();
                 summaryTextView.setGravity(Gravity.RIGHT);
                 break;
+
             case TREAT_TYPE:
                 summaryText = treatTypeText + " ($" + amount.toString() + ") by " +
-                        billSplit.getNoOfPplSharing() + ", \tper " +
-                        getString(R.string.guest) + " :\t$" + billSplit.getSplitAmount().toString();
+                        billSplit.getNoOfPplSharing() + " : $" + billSplit.getSplitAmount().toString();
                 summaryTextView.setGravity(Gravity.LEFT);
                 break;
-            case SHARE_TYPE:
+
             case TREAT_SHARE_TYPE:
-                summaryText = treatTypeText + " ($" + amount.toString() + ") by " +
-                        billSplit.getNoOfPplSharing() + ", \tper " +
-                        getString(R.string.guest) + " :\t$" + billSplit.getSplitAmount().toString();
+                summaryText = "T-";
+                //summaryText = getBillSplitString(BillSplit.BillSplitType.TREAT_TYPE) + " ($" + mTreatAmountPax.toString() + ") ";
+            case SHARE_TYPE:
+                summaryText = summaryText + treatTypeText + " ($" + amount.toString() + ") by " +
+                        billSplit.getNoOfPplSharing() + " : $" + billSplit.getSplitAmount().toString();
                 summaryTextView.setGravity(Gravity.RIGHT);
                 break;
         }
@@ -204,6 +223,22 @@ public class SummaryFragment extends Fragment {
                 return getString(R.string.treat);
             default:
                 return getString(R.string.unknown_type);
+        }
+    }
+
+    public void smallView() {
+        TextView textView;
+        for (int i = 0; i < mNumOfTextView; i++) {
+            textView = (TextView) mLinearLayout.findViewById(i);
+            textView.setTextAppearance(this.getActivity(), android.R.style.TextAppearance_Small);
+        }
+    }
+
+    public void largeView() {
+        TextView textView;
+        for (int i = 0; i < mNumOfTextView; i++) {
+            textView = (TextView) mLinearLayout.findViewById(i);
+            textView.setTextAppearance(this.getActivity(), android.R.style.TextAppearance_Medium);
         }
     }
 }
