@@ -24,7 +24,7 @@ public class SummaryFragment extends Fragment {
     private LinearLayout mLinearLayout;
     private int mNumOfTextView = 0;
     private int mNumOfPplTreating = 0; // 0 value to indicate there is no active treat split type
-    private BigDecimal mTreatAmountPax;
+    private BigDecimal mTreatAmountPax = BigDecimal.ZERO;
     private int mTotalNumOfPpl = 0;
 
     @Override
