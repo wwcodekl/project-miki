@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -38,6 +39,7 @@ import wwckl.projectmiki.models.Receipt;
 public class MainActivity extends AppCompatActivity {
     final int REQUEST_INPUT_METHOD = 1;  // for checking of requestCode onActivityResult
     final int REQUEST_PICTURE_MEDIASTORE = 2;
+    final long fFileSizeToScale = 1000000; // 1 MB in bytes
 
     private String mInputMethod = ""; // whether to start Gallery or Camera
     private String mPicturePath = ""; // path of where the picture is saved.
@@ -209,17 +211,21 @@ public class MainActivity extends AppCompatActivity {
                     String[] filePathColumn = { MediaStore.Images.Media.DATA };
 
                     Cursor cursor = getContentResolver().query(mPictureUri,
-                            filePathColumn, null, null, null);
+                            null, null, null, null);
                     cursor.moveToFirst();
 
                     int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                     mPicturePath = cursor.getString(columnIndex);
+                    int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                    long fileSize = cursor.getLong(sizeIndex);
+                    Log.d("image fileSize", Long.toString(fileSize));
                     cursor.close();
 
                     // We do not require high resolution images as it may cause OutOfMemoryError
                     BitmapFactory.Options bmpOptions = new BitmapFactory.Options();
-                    // TODO: set scale factor according to file size.
-                    bmpOptions.inSampleSize = 2;
+                    // Scale output picture if file size is too large.
+                    if (fileSize > fFileSizeToScale)
+                        bmpOptions.inSampleSize = 2;
                     mReceiptPicture = BitmapFactory.decodeFile(mPicturePath, bmpOptions);
 
                     // Check picture orientation
