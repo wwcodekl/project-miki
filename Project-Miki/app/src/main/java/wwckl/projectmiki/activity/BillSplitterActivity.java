@@ -236,8 +236,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             mButtonNext.setVisibility(View.INVISIBLE);
             mButtonDone.setText(getString(R.string.new_));
             // Completed Bill split, blow up summary
-            //mSummaryFragment.largeView();
-            mTotalsLayout.setVisibility(View.GONE);
+            mSummaryFragment.largeView();
             mSummaryLayout.setVisibility(View.GONE);
             mSelectAllCheckBox.setVisibility(View.GONE);
         }
@@ -245,8 +244,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             mButtonPrev.setVisibility(View.INVISIBLE);
             mButtonNext.setVisibility(View.VISIBLE);
             mButtonDone.setText(getString(R.string.done));
-            //mSummaryFragment.smallView();
-            mTotalsLayout.setVisibility(View.VISIBLE);
+            mSummaryFragment.smallView();
             mSummaryLayout.setVisibility(View.VISIBLE);
             mSelectAllCheckBox.setVisibility(View.VISIBLE);
         }
