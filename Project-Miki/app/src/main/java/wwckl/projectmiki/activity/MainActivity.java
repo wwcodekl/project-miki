@@ -174,6 +174,10 @@ public class MainActivity extends AppCompatActivity {
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
                 return true;
+            case R.id.action_help:
+                Intent myWebLink = new Intent(android.content.Intent.ACTION_VIEW);
+                myWebLink.setData(Uri.parse("https://github.com/WomenWhoCode/KL-network/wiki/Project-Miki-Help-File"));
+                startActivity(myWebLink);
             case R.id.action_gallery:
                 startGallery();
                 return true;

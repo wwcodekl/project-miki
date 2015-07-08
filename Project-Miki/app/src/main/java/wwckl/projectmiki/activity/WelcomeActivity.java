@@ -2,6 +2,7 @@ package wwckl.projectmiki.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -69,6 +70,10 @@ public class WelcomeActivity extends AppCompatActivity {
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
                 return true;
+            case R.id.action_help:
+                Intent myWebLink = new Intent(android.content.Intent.ACTION_VIEW);
+                myWebLink.setData(Uri.parse("https://github.com/WomenWhoCode/KL-network/wiki/Project-Miki-Help-File"));
+                startActivity(myWebLink);
             default:
                 return super.onOptionsItemSelected(item);
         }

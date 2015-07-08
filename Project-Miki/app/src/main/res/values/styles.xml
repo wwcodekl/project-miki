@@ -9,13 +9,22 @@
         <item name="android:actionModeStyle">@style/CustomActionMode</item>
         <item name="android:actionModeCloseButtonStyle">@style/action_button_done</item>
         <item name="android:actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
+        <item name="actionBarStyle">@style/TitledActionBarStyle</item>
+        <!-- Support library compatibility -->
+        <item name="actionBarDivider">@null</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeBackground">@color/primary_material_dark</item>
+        <item name="actionModeStyle">@style/CustomActionMode</item>
+        <item name="actionModeCloseButtonStyle">@style/action_button_done</item>
+        <item name="actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
     </style>
 
     <style name="CustomActionMode" parent="Widget.AppCompat.ActionBar">
-        <item name="android:background">?android:attr/actionModeBackground</item>
-        <item name="android:backgroundSplit">?android:attr/actionModeSplitBackground</item>
+        <item name="android:background">@drawable/wwckl_title_background</item>
         <item name="android:height">?android:attr/actionBarSize</item>
-        <item name="android:textColor">@color/primary_text_default_material_light</item>
+        <!-- Support library compatibility -->
+        <item name="background">@drawable/wwckl_title_background</item>
+        <item name="height">?android:attr/actionBarSize</item>
     </style>
 
     <style name="action_button_done" parent="Widget.AppCompat.ActionButton.CloseMode">
@@ -26,7 +35,6 @@
 
     <style name="BillSplitterTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:actionBarStyle">@style/NoTitleActionBarStyle</item>
-        <item name="android:actionBarItemBackground">@color/primary_material_dark</item>
         <item name="android:actionMenuTextAppearance">@style/NoTitleActionBarMenuStyle</item>
         <!-- Support library compatibility -->
         <item name="actionBarStyle">@style/NoTitleActionBarStyle</item>
@@ -35,20 +43,22 @@
 
     <style name="NoTitleActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:displayOptions">useLogo|showHome</item>
-        <item name="android:background">@color/primary_material_dark</item>
+        <item name="android:background">@drawable/wwckl_title_background</item>
         <!-- Support library compatibility -->
         <item name="displayOptions">useLogo|showHome</item>
-        <item name="background">@color/primary_material_dark</item>
+        <item name="background">@drawable/wwckl_title_background</item>
     </style>
 
-    <style name="NoTitleActionBarMenuStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Menu">
+    <style name="NoTitleActionBarMenuStyle" parent="TextAppearance.AppCompat.Widget.ActionBar.Menu">
         <item name="android:textColor">@color/primary_material_dark</item>
         <item name="android:textSize">20sp</item>
     </style>
 
     <style name="TitledActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="android:displayOptions">useLogo|showHome|showTitle</item>
+        <item name="android:displayOptions">showTitle</item>
+        <item name="android:background">@drawable/wwckl_title_background</item>
         <!-- Support library compatibility -->
-        <item name="displayOptions">useLogo|showHome|showTitle</item>
+        <item name="displayOptions">showTitle</item>
+        <item name="background">@drawable/wwckl_title_background</item>
     </style>
 </resources>

@@ -1,6 +1,7 @@
 package wwckl.projectmiki.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -122,6 +123,10 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
                 return true;
+            case R.id.action_help:
+                Intent myWebLink = new Intent(android.content.Intent.ACTION_VIEW);
+                myWebLink.setData(Uri.parse("https://github.com/WomenWhoCode/KL-network/wiki/Project-Miki-Help-File"));
+                startActivity(myWebLink);
             case R.id.dutch:
                 swapSplitType(BillSplit.BillSplitType.DUTCH_TYPE);
                 return true;

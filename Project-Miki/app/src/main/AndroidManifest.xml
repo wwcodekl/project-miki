@@ -13,7 +13,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".activity.MainActivity"
-            android:label="@string/receipt" >
+            android:label="@string/receipt">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -22,7 +22,6 @@
         <activity
             android:name=".activity.BillSplitterActivity"
             android:label="@string/split_bill"
-            android:parentActivityName=".activity.MainActivity"
             android:theme="@style/BillSplitterTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -30,11 +29,11 @@
         </activity>
         <activity
             android:name=".activity.WelcomeActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
         </activity>
         <activity
             android:name=".activity.LoadingActivity"
-            android:label="@string/cleaning_image" >
+            android:label="@string/cleaning_image">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="wwckl.projectmiki.activity.MainActivity" />
