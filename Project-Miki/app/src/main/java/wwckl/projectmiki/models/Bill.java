@@ -533,6 +533,9 @@ public class Bill {
 
     // calculates the percentage of fracAmount/total
     private int calculatePercent(BigDecimal fracAmount, BigDecimal total){
+        if (isZero(total))
+            return 0;
+
         BigDecimal percent;
         percent = fracAmount.multiply(BigDecimal.valueOf(100));
         percent = percent.divide(total, 0, BigDecimal.ROUND_HALF_EVEN);
