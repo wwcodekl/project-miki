@@ -28,6 +28,7 @@ import wwckl.projectmiki.fragment.SummaryFragment;
 import wwckl.projectmiki.models.Bill;
 import wwckl.projectmiki.models.BillSplit;
 import wwckl.projectmiki.models.Item;
+import wwckl.projectmiki.models.ParseBill;
 import wwckl.projectmiki.models.Receipt;
 
 /**
@@ -100,13 +101,13 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         // Initialise Bill contents
         if (Receipt.getRecognizedText().isEmpty()) {
             // assume new bill
-            mBill = new Bill("1 Item 1.00");
+            mBill = (Bill) new ParseBill("1 Item 1.00");
             // no associated image
             Receipt.setReceiptBitmap(null);
             startEditFragment();
         }
         else {
-            mBill = new Bill(Receipt.getRecognizedText());
+            mBill = (Bill) new ParseBill(Receipt.getRecognizedText());
             drawItemizedLayout();
             updateTotals();
             if(!mBill.isBillBalanced()){

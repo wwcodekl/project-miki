@@ -162,7 +162,7 @@ public class EditFragment extends Fragment {
             mBill = mBillSplitterActivity.getActivityBill();
         }
         else {
-            mBill = new Bill("");
+            mBill = new Bill();
         }
     }
 
