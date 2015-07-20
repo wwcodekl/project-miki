@@ -3,18 +3,23 @@ package wwckl.projectmiki.activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,17 +62,23 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     private TextView mTotalTextView;
     private TextView mSplitTypeTextView;
     private TextView mSummaryTextView;
+    private TextView mInstructionsTextView;
+    private ScrollView mSummaryScrollView;
     private Spinner mShareSpinner;
     ArrayAdapter<String> mShareAdapter;
     private SummaryFragment mSummaryFragment;
     private FragmentManager mFragmentManager;
+    private SharedPreferences mSharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bill_splitter);
 
-        // set fragment manager
+        // get preference manager
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // get fragment manager
         mFragmentManager = getFragmentManager();
 
         // Get the various layout objects
@@ -79,6 +90,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         mTotalTextView = (TextView)findViewById(R.id.tvTotal);
         mSplitTypeTextView = (TextView)findViewById(R.id.tvSplitType);
         mSummaryTextView = (TextView)findViewById(R.id.tvSummary);
+        mSummaryScrollView = (ScrollView)findViewById(R.id.scrollSummary);
         mSummaryFragment = (SummaryFragment) mFragmentManager.findFragmentById(R.id.summaryFragment);
         mButtonNext = (Button)findViewById(R.id.button_next);
         mButtonDone = (Button)findViewById(R.id.button_done);
@@ -98,6 +110,14 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         mShareAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, shareNumbers);
         mShareSpinner.setAdapter(mShareAdapter);
 
+        // set up helper instruction text
+        mInstructionsTextView = (TextView)findViewById(R.id.tvInstructions);
+        boolean displayHelper = mSharedPrefs.getBoolean(getString(R.string.pref_show_help_messages), true);
+        if (displayHelper)
+            mInstructionsTextView.setVisibility(View.VISIBLE);
+        else
+            mInstructionsTextView.setVisibility(View.GONE);
+
         // Initialise Bill contents
         if (Receipt.getRecognizedText().isEmpty()) {
             // assume new bill
@@ -111,9 +131,10 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             drawItemizedLayout();
             updateTotals();
             if(!mBill.isBillBalanced()){
-                Toast.makeText(this, getString(R.string.bill_not_balanced), Toast.LENGTH_LONG).show();
+                displayToast(getString(R.string.bill_not_balanced), false);
             }
         }
+        displayToast(getString(R.string.click_menu_to_edit_bill), true);
     }
 
     @Override
@@ -254,6 +275,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     // should be called after updateCheckBoxes.
     private void updateButtons() {
         int numOfCalculatedItems = 0;
+        boolean displayHelper = mSharedPrefs.getBoolean(getString(R.string.pref_show_help_messages), true);
 
         for (int i = 0; i < mBill.getListOfAllItems().size(); i++) {
             CheckBox checkBox = (CheckBox) mItemizedLayout.findViewById(i);
@@ -268,6 +290,9 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             mButtonDone.setText(getString(R.string.new_));
             // Completed Bill split, blow up summary
             mSummaryFragment.largeView();
+            mSummaryScrollView.setVisibility(View.VISIBLE);
+            setSummaryScrollViewWeight(true);
+            mInstructionsTextView.setVisibility(View.GONE);
             mSummaryLayout.setVisibility(View.GONE);
             mSelectAllCheckBox.setVisibility(View.GONE);
         }
@@ -276,14 +301,22 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             mButtonNext.setVisibility(View.VISIBLE);
             mButtonDone.setText(getString(R.string.done));
             mSummaryFragment.smallView();
+            mSummaryScrollView.setVisibility(View.GONE);
             mSummaryLayout.setVisibility(View.VISIBLE);
             mSelectAllCheckBox.setVisibility(View.VISIBLE);
+            if (displayHelper)
+                mInstructionsTextView.setVisibility(View.VISIBLE);
+            else
+                mInstructionsTextView.setVisibility(View.GONE);
         }
         else {
             mButtonPrev.setVisibility(View.VISIBLE);
             mButtonNext.setVisibility(View.VISIBLE);
             mButtonDone.setText(getString(R.string.done));
             mSummaryFragment.smallView();
+            mSummaryScrollView.setVisibility(View.VISIBLE);
+            setSummaryScrollViewWeight(false);
+            mInstructionsTextView.setVisibility(View.GONE);
             mTotalsLayout.setVisibility(View.VISIBLE);
             mSummaryLayout.setVisibility(View.VISIBLE);
             mSelectAllCheckBox.setVisibility(View.VISIBLE);
@@ -322,6 +355,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     // User swap split type on actionbar menu.
     private void swapSplitType(BillSplit.BillSplitType splitType){
         updateMenuButtons(splitType);
+        setInstructionsText(splitType);
         updateSummary();
     }
 
@@ -556,6 +590,55 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         }
     }
 
+    private void setSummaryScrollViewWeight(Boolean isDone) {
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mSummaryScrollView.getLayoutParams();
+        float weight = 12; // default
+
+        if (isDone) {
+            //gravity = 20;
+            LinearLayout.LayoutParams doneParams = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+            params = doneParams;
+        }
+        else
+            params.height = 0;
+
+        if (mBill.getNumOfBillSplits() < 5) {
+            // add 3 for each split type
+            weight = mBill.getNumOfBillSplits() * 3.0f;
+        }
+
+        params.weight = weight;
+        mSummaryScrollView.setLayoutParams(params);
+    }
+
+    private void setInstructionsText(BillSplit.BillSplitType splitType) {
+        boolean displayHelper = mSharedPrefs.getBoolean(getString(R.string.pref_show_help_messages), true);
+        if (displayHelper && (mBill.getNumOfBillSplits() == 0))
+            mInstructionsTextView.setVisibility(View.VISIBLE);
+        else {
+            mInstructionsTextView.setVisibility(View.GONE);
+            return;
+        }
+
+        switch (splitType) {
+            case DUTCH_TYPE:
+            case TREAT_DUTCH_TYPE:
+                mInstructionsTextView.setText(getString(R.string.dutch_split_instructions));
+                break;
+            case SHARE_TYPE:
+            case TREAT_SHARE_TYPE:
+                mInstructionsTextView.setText(getString(R.string.share_split_instructions));
+                break;
+            case TREAT_TYPE:
+                mInstructionsTextView.setText(getString(R.string.treat_split_instructions));
+                break;
+            default:
+                mInstructionsTextView.setText(getString(R.string.bill_split_instructions));
+                break;
+        }
+    }
+
     // ************************ EDIT FRAGMENT CALLBACKS ********************
     private void startEditFragment() {
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
@@ -631,4 +714,25 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         }
     }
     // ********************** END EDIT FRAGMENT CALLBACKS ******************
+
+    public void displayToast(String toastString, Boolean isHelper) {
+        if (isHelper) {
+            boolean displayHelper = mSharedPrefs.getBoolean(getString(R.string.pref_show_help_messages), true);
+
+            if (!displayHelper)
+                return;
+        }
+
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.custom_toast,
+                (ViewGroup) findViewById(R.id.toast_layout_root));
+
+        TextView text = (TextView) layout.findViewById(R.id.text);
+        text.setText(toastString);
+
+        Toast toast = new Toast(getApplicationContext());
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.show();
+    }
 }

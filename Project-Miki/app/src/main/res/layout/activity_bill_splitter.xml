@@ -71,24 +71,33 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"/>
     </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/bill_split_instructions"
+        android:id="@+id/tvInstructions"
+        android:textColor="@color/secondary_light"
+        style="@style/Base.Theme.AppCompat.Dialog" />
+
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:id="@+id/scrollSummary"
         android:layout_weight="10"
         android:fadeScrollbars="false"
-        android:scrollbarStyle="outsideInset">
-        <LinearLayout
+        android:scrollbarStyle="outsideInset"
+        android:visibility="gone"
+        android:padding="2dp"
+        android:clipToPadding="false">
+        <fragment
+            android:id="@+id/summaryFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <fragment
-                android:id="@+id/summaryFragment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                class="wwckl.projectmiki.fragment.SummaryFragment"
-                tools:layout="@layout/fragment_summary"/>
-        </LinearLayout>
+            class="wwckl.projectmiki.fragment.SummaryFragment"
+            tools:layout="@layout/fragment_summary"/>
     </ScrollView>
 
     <LinearLayout
@@ -121,18 +130,16 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/primary_dark_material_dark"
-            android:text="@string/guest"
+            android:text="@string/guest_init"
             android:id="@+id/tvSummary"/>
     </LinearLayout>
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_weight="2"
-        android:paddingTop="0dp"
-        android:paddingBottom="0dp">
+        android:layout_weight="2">
         <Button
             android:id="@+id/button_prev"
             android:layout_width="wrap_content"
@@ -140,21 +147,21 @@
             android:text="@string/prev"
             android:clickable="true"
             android:onClick="previousGuest"
-            android:visibility="gone"/>
+            android:visibility="gone" />
         <Button
             android:id="@+id/button_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/next"
             android:clickable="true"
-            android:onClick="nextGuest"/>
+            android:onClick="nextGuest" />
         <Button
             android:id="@+id/button_done"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/done"
             android:clickable="true"
-            android:onClick="finishBillSplit"/>
+            android:onClick="finishBillSplit" />
 
     </LinearLayout>
 

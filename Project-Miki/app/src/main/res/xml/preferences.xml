@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <CheckBoxPreference
-        android:key="pref_display_welcome"
+        android:key="@string/pref_display_welcome"
         android:title="@string/pref_display_welcome"
         android:summary="@string/pref_summ_display_welcome"
         android:defaultValue="true" />
     <ListPreference
-        android:key="pref_input_method"
+        android:key="@string/pref_input_method"
         android:title="@string/pref_input_method"
+        android:summary="@string/pref_summ_input_method"
         android:dialogTitle="@string/pref_input_method"
         android:entries="@array/pref_input_method"
         android:entryValues="@array/pref_input_method_values"
         android:defaultValue="@string/gallery" />
+    <CheckBoxPreference
+        android:key="@string/pref_show_help_messages"
+        android:title="@string/pref_show_help_messages"
+        android:summary="@string/pref_summ_show_help_messages"
+        android:defaultValue="true" />
 </PreferenceScreen>

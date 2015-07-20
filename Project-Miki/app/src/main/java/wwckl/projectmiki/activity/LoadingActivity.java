@@ -9,6 +9,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.os.Handler;
@@ -35,6 +36,7 @@ public class LoadingActivity extends AppCompatActivity {
     private ImageView mImageView;
     private ProgressBar mProgressBar;
     private TextView mTextView;
+    private Button mNextButton;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -60,6 +62,7 @@ public class LoadingActivity extends AppCompatActivity {
         // Progress bar
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mTextView = (TextView) findViewById(R.id.tvRecognisedText);
+        mNextButton = (Button) findViewById(R.id.btnNext);
 
         // START thread to do back ground operations
         startOperation();
@@ -71,8 +74,10 @@ public class LoadingActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.GONE);
 
         // testing, display recognised text
-        if(!mRecognizedText.isEmpty())
+        if(!mRecognizedText.isEmpty()) {
             mTextView.setText(mRecognizedText);
+            mNextButton.setVisibility(View.VISIBLE);
+        }
         mImageView.setVisibility(View.GONE);
 
         // Store receipt text
@@ -83,6 +88,11 @@ public class LoadingActivity extends AppCompatActivity {
     public void startBillSplitting(){
         Intent intent = new Intent(this, BillSplitterActivity.class);
         startActivity(intent);
+    }
+
+    // for onClick of Next button
+    public void startBillSplitting(View view) {
+        startBillSplitting();
     }
 
     // Start thread to run Tesseract

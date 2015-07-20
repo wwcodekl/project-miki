@@ -23,4 +23,14 @@
         android:contentDescription="@string/recognised_text"
         android:layout_alignParentTop="true"/>
 
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/next"
+        android:clickable="true"
+        android:onClick="startBillSplitting"
+        android:visibility="gone"/>
+
 </RelativeLayout>

@@ -22,10 +22,13 @@ import android.provider.OpenableColumns;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -39,8 +42,12 @@ import wwckl.projectmiki.models.Receipt;
 public class MainActivity extends AppCompatActivity {
     final int REQUEST_INPUT_METHOD = 1;  // for checking of requestCode onActivityResult
     final int REQUEST_PICTURE_MEDIASTORE = 2;
+    final int RESUME_FROM_OTHER = 0;
+    final int RESUME_FROM_CAMERA = 1;
+    final int RESUME_FROM_GALLERY = 2;
     final long fFileSizeToScale = 1000000; // 1 MB in bytes
 
+    private int mResumeFrom = 0; // what instruction to display if any.
     private String mInputMethod = ""; // whether to start Gallery or Camera
     private String mPicturePath = ""; // path of where the picture is saved.
     private ActionMode mActionMode = null; // for Context Action Bar
@@ -59,11 +66,15 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar mColorThresholdBar;
     private SeekBar mContrastBar;
     private Button mNextButton;
+    private SharedPreferences mSharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // get preference manager
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Get layout objects for manipulation later.
         mTextView = (TextView)findViewById(R.id.textView);
@@ -156,6 +167,17 @@ public class MainActivity extends AppCompatActivity {
             adjustThreshold(mColorThresholdBar.getProgress());
 
             mNextButton.setEnabled(true);
+
+            switch (mResumeFrom) {
+                case RESUME_FROM_CAMERA:
+                    displayToast(getString(R.string.crop_picture_instructions), true);
+                    break;
+                case RESUME_FROM_GALLERY:
+                    displayToast(getString(R.string.adjust_picture_instructions), true);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -204,8 +226,7 @@ public class MainActivity extends AppCompatActivity {
                     mInputMethod = data.getStringExtra("result_input_method");
                 }
                 else {
-                    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-                    mInputMethod = sharedPrefs.getString("pref_input_method", getString(R.string.gallery));
+                    mInputMethod = mSharedPrefs.getString("pref_input_method", getString(R.string.gallery));
                 }
                 // Get receipt image based on selected/default input method.
                 getReceiptPicture();
@@ -280,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         this.mDoubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+        displayToast(getString(R.string.click_back_again_to_exit), false);
 
         new Handler().postDelayed(new Runnable() {
             // This handle allows the flag to be reset after 2 seconds(i.e. Toast.LENGTH_SHORT's duration)
@@ -293,14 +314,13 @@ public class MainActivity extends AppCompatActivity {
 
     // retrieves the selected or default input method
     private void getDefaultInputMethod() {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean displayWelcome = sharedPrefs.getBoolean("pref_display_welcome", true);
+        boolean displayWelcome = mSharedPrefs.getBoolean(getString(R.string.pref_display_welcome), true);
 
         if (displayWelcome) {
             startWelcomeActivity();
         }
         else {
-            mInputMethod = sharedPrefs.getString("pref_input_method", getString(R.string.gallery));
+            mInputMethod = mSharedPrefs.getString(getString(R.string.pref_input_method), getString(R.string.gallery));
             // Get receipt image based on selected/default input method.
             getReceiptPicture();
         }
@@ -331,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
 
     // start gallery
     private void startGallery() {
+        mResumeFrom = RESUME_FROM_GALLERY;
         Intent intentGallery = new Intent(
                 Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
@@ -339,6 +360,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Start Camera
     private void startCamera() {
+        mResumeFrom = RESUME_FROM_CAMERA;
         Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // start the image capture Intent
         startActivityForResult(intentCamera, REQUEST_PICTURE_MEDIASTORE);
@@ -346,6 +368,9 @@ public class MainActivity extends AppCompatActivity {
 
     // onClick of next button
     public void startLoadingAcitivty(View view) {
+        // clear instructions flag
+        mResumeFrom = RESUME_FROM_OTHER;
+
         if (mColorThresholdBar.getProgress() >0)
             mReceiptPicture = changeColor(mReceiptPicture, mColorThresholdBar.getProgress());
 
@@ -356,6 +381,9 @@ public class MainActivity extends AppCompatActivity {
 
     // Start Edit Fragment on BillSplitterActivity
     private void startEdit() {
+        // clear instructions flag
+        mResumeFrom = RESUME_FROM_OTHER;
+
         // Make sure recognized text is empty
         Receipt.setRecognizedText("");
         Intent intentEdit = new Intent(this, BillSplitterActivity.class);
@@ -375,6 +403,9 @@ public class MainActivity extends AppCompatActivity {
             return;
 
         try {
+            // set instructions for after cropping
+            mResumeFrom = RESUME_FROM_GALLERY;
+
             //call the standard crop action intent (the user device may not support it)
             Intent cropIntent = new Intent("com.android.camera.action.CROP");
             cropIntent.setDataAndType(mPictureUri, "image/*");
@@ -383,9 +414,7 @@ public class MainActivity extends AppCompatActivity {
         }
         catch(ActivityNotFoundException anfe){
             //display an error message
-            String errorMessage = "Whoops - your device doesn't support the crop action!";
-            Toast toast = Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT);
-            toast.show();
+            displayToast(getString(R.string.crop_error_message), false);
         }
     }
 
@@ -437,7 +466,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Change bitmap image colours to 4 shades: black, dark gray, light gray or white
-    // We want contrasting shades, so no midshades such as gray.
+    // We want contrasting shades, so no mid-shades such as gray.
     private Bitmap changeColor(Bitmap src, int progress) {
         final int absBlack = Math.abs(Color.BLACK);
         final int absWhite = Math.abs(Color.WHITE);
@@ -544,4 +573,25 @@ public class MainActivity extends AppCompatActivity {
             mActionMode = null;
         }
     };
+
+    private void displayToast(String toastString, Boolean isHelper) {
+        if (isHelper) {
+            boolean displayHelper = mSharedPrefs.getBoolean(getString(R.string.pref_show_help_messages), true);
+
+            if (!displayHelper)
+                return;
+        }
+
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.custom_toast,
+                (ViewGroup) findViewById(R.id.toast_layout_root));
+
+        TextView text = (TextView) layout.findViewById(R.id.text);
+        text.setText(toastString);
+
+        Toast toast = new Toast(getApplicationContext());
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.show();
+    }
 }

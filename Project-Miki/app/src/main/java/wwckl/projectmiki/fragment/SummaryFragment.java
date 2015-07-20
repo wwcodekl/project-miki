@@ -230,7 +230,7 @@ public class SummaryFragment extends Fragment {
         TextView textView;
         for (int i = 0; i < mNumOfTextView; i++) {
             textView = (TextView) mLinearLayout.findViewById(i);
-            textView.setTextAppearance(this.getActivity(), android.R.style.TextAppearance_Small);
+            textView.setTextAppearance(this.getActivity(), android.R.style.TextAppearance_Medium);
         }
     }
 
@@ -238,7 +238,8 @@ public class SummaryFragment extends Fragment {
         TextView textView;
         for (int i = 0; i < mNumOfTextView; i++) {
             textView = (TextView) mLinearLayout.findViewById(i);
-            textView.setTextAppearance(this.getActivity(), android.R.style.TextAppearance_Medium);
+            textView.setTextAppearance(this.getActivity(), android.R.style.TextAppearance_Large);
         }
+
     }
 }

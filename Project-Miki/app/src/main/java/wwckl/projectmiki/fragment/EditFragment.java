@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -83,10 +82,11 @@ public class EditFragment extends Fragment {
 
         // Set up UseSubtotals checkbox
         mUseSubtotalsCheckBox = (CheckBox) mView.findViewById(R.id.cbUseSubtotals);
-        mUseSubtotalsCheckBox.setChecked(!mBill.getUseSubtotals());
+        mUseSubtotalsCheckBox.setChecked(mBill.getUseSubtotals());
         mUseSubtotalsCheckBox.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mBill.setUseSubtotals(!mUseSubtotalsCheckBox.isChecked());
+                mBill.setUseSubtotals(mUseSubtotalsCheckBox.isChecked());
+                updateTotals();
             }
         });
 
@@ -164,6 +164,7 @@ public class EditFragment extends Fragment {
         else {
             mBill = new Bill();
         }
+        mBillSplitterActivity.displayToast(getString(R.string.click_done_when_complete), true);
     }
 
     private void setOnFocusChangeListener(EditText editText){
