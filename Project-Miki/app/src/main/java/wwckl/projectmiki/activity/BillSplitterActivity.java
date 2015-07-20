@@ -133,8 +133,8 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             if(!mBill.isBillBalanced()){
                 displayToast(getString(R.string.bill_not_balanced), false);
             }
+            displayToast(getString(R.string.click_menu_to_edit_bill), true);
         }
-        displayToast(getString(R.string.click_menu_to_edit_bill), true);
     }
 
     @Override

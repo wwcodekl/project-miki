@@ -81,14 +81,14 @@
     <string name="crop_error_message">Whoops - your device doesn\'t support the crop action!</string>
     <string name="bill_not_balanced">Bill not balanced!\nPlease check totals</string>
     <string name="click_menu_to_edit_bill">Click menu to edit Bill</string>
-    <string name="click_done_when_complete">Click done when complete</string>
+    <string name="click_done_when_complete">Click DONE when complete</string>
     <string name="unknown_type">UNKNOWN TYPE</string>
 
     <!--- instructions -->
     <string name="crop_picture_instructions">Crop picture to quantity, items, price and total</string>
     <string name="adjust_picture_instructions">Adjust the brightness and the shade of grey for better detection</string>
     <string name="bill_split_instructions">
-        1. Choose split option\n
+        1. Choose Split option at the top\n
         2. Select items for each guest\n
         3. Click NEXT to select for next guest\n
         4. Or click DONE to split using all remaining items
