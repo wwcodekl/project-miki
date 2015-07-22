@@ -13,6 +13,7 @@ import android.widget.TextView;
 import java.math.BigDecimal;
 
 import wwckl.projectmiki.R;
+import wwckl.projectmiki.activity.BillSplitterActivity;
 import wwckl.projectmiki.models.BillSplit;
 
 /**
@@ -26,6 +27,7 @@ public class SummaryFragment extends Fragment {
     private int mNumOfPplTreating = 0; // 0 value to indicate there is no active treat split type
     private BigDecimal mTreatAmountPax = BigDecimal.ZERO;
     private int mTotalNumOfPpl = 0;
+    private BillSplitterActivity mBillSplitterActivity;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,6 +35,7 @@ public class SummaryFragment extends Fragment {
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_summary, container, false);
         mLinearLayout = (LinearLayout) mView.findViewById(R.id.layoutSummaryFragment);
+        mBillSplitterActivity = (BillSplitterActivity) getActivity();
         return mView;
     }
 
@@ -171,7 +174,7 @@ public class SummaryFragment extends Fragment {
                 summaryText = "T-";
                 //summaryText = getBillSplitString(BillSplit.BillSplitType.TREAT_TYPE) + " ($" + mTreatAmountPax.toString() + ") ";
             case DUTCH_TYPE:
-                summaryText = summaryText + treatTypeText + "\t" + getString(R.string.guest) + " " +
+                summaryText = summaryText + treatTypeText + " \t" + getString(R.string.guest) + " " +
                         mTotalNumOfPpl + " : $" + amount.toString();
                 summaryTextView.setGravity(Gravity.RIGHT);
                 break;
@@ -196,6 +199,23 @@ public class SummaryFragment extends Fragment {
         summaryTextView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
         summaryTextView.setText(summaryText);
+        summaryTextView.setClickable(true);
+        summaryTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if( v.isSelected() ) {
+                    v.setSelected(false);
+                    v.setBackgroundColor(getResources().getColor(R.color.background_material_light));
+                    mBillSplitterActivity.highlightSplitItems(v.getId(), false);
+                }
+                else {
+                    v.setSelected(true);
+                    v.setBackgroundColor(getResources().getColor(R.color.background));
+                    mBillSplitterActivity.highlightSplitItems(v.getId(), true);
+                }
+                Log.d("onClick tv", Integer.toString(v.getId()));
+            }
+        });
 
         try{
             mLinearLayout.addView(summaryTextView);

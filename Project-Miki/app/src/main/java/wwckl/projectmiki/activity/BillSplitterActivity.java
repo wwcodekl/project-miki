@@ -338,6 +338,8 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             }
             else if (item.getGuestIndex() >= numOfBillSplits) {
                 checkBox.setEnabled(true);
+                // in case it was selected, clear highlight
+                checkBox.setBackgroundColor(getResources().getColor(R.color.background_material_light));
             }
             else
                 checkBox.setEnabled(false);
@@ -719,5 +721,27 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         toast.setDuration(Toast.LENGTH_SHORT);
         toast.setView(layout);
         toast.show();
+    }
+
+    public void highlightSplitItems(int index, Boolean setSelected) {
+        Iterator<Item> iterator = mBill.getListOfAllItems().iterator();
+        int id = 0;
+
+        while (iterator.hasNext()) {
+            Item item = iterator.next();
+
+            CheckBox checkBox = (CheckBox) mItemizedLayout.findViewById(id);
+            if (checkBox != null) {
+                if (item.getGuestIndex() == index) {
+                    if (setSelected)
+                        checkBox.setBackgroundColor(getResources().getColor(R.color.background));
+                    else
+                        checkBox.setBackgroundColor(getResources().getColor(R.color.background_material_light));
+                }
+                else if (item.getGuestIndex() < 0) // in case user clicked prev.
+                    checkBox.setBackgroundColor(getResources().getColor(R.color.background_material_light));
+            }
+            id++;
+        }
     }
 }
