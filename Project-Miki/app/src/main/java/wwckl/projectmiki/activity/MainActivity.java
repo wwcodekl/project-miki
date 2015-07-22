@@ -339,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
             startEdit();
         }
         else {
-            Log.d("getReceiptImage", "NOT gallery or camera.");
+            Log.d("getReceiptImage", "NOT gallery/camera/manual.");
         }
     }
 

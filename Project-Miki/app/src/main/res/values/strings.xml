@@ -41,13 +41,13 @@
 
     <string-array name="pref_input_method">
         <item name="pref_input_method_camera">Camera</item>
-        <item name="pref_input_method_batch">Batch mode camera</item>
         <item name="pref_input_method_gallery">Gallery</item>
+        <item name="pref_input_method_manual">Manually</item>
     </string-array>
     <string-array name="pref_input_method_values">
         <item name="camera">Camera</item>
-        <item name="batch">Batch</item>
         <item name="gallery">Gallery</item>
+        <item name="edit">Edit</item>
     </string-array>
 
     <string name="receipt_picture">Receipt picture</string>

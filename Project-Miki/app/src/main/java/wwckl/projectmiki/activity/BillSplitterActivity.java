@@ -393,7 +393,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         }
 
         // Get string
-        String billSplitString = getBillSplitString(mBillSplitType);
+        String billSplitString = mSummaryFragment.getBillSplitString(mBillSplitType);
 
         switch(mBillSplitType){
             default:
@@ -573,21 +573,6 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
 
     private int getNumOfSharing(){
         return Integer.parseInt((String) mShareSpinner.getSelectedItem());
-    }
-
-    public String getBillSplitString(BillSplit.BillSplitType splitType){
-        switch (splitType) {
-            case DUTCH_TYPE:
-            case TREAT_DUTCH_TYPE:
-                return getString(R.string.dutch);
-            case SHARE_TYPE:
-            case TREAT_SHARE_TYPE:
-                return getString(R.string.share);
-            case TREAT_TYPE:
-                return getString(R.string.treat);
-            default:
-                return getString(R.string.unknown_type);
-        }
     }
 
     private void setSummaryScrollViewWeight(Boolean isDone) {

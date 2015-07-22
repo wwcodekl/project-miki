@@ -215,12 +215,12 @@ public class SummaryFragment extends Fragment {
         switch (splitType) {
             case DUTCH_TYPE:
             case TREAT_DUTCH_TYPE:
-                return getString(R.string.dutch);
+                return getString(R.string.dutch).toUpperCase();
             case SHARE_TYPE:
             case TREAT_SHARE_TYPE:
-                return getString(R.string.share);
+                return getString(R.string.share).toUpperCase();
             case TREAT_TYPE:
-                return getString(R.string.treat);
+                return getString(R.string.treat).toUpperCase();
             default:
                 return getString(R.string.unknown_type);
         }
