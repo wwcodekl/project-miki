@@ -9,6 +9,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.os.Handler;
@@ -30,11 +31,12 @@ import wwckl.projectmiki.models.Receipt;
  */
 public class LoadingActivity extends AppCompatActivity {
     private Bitmap mReceiptPicture = null;
-    private String mRecognizedText = "start";
+    private String mRecognizedText = "Error 404: Not found";
 
     private ImageView mImageView;
     private ProgressBar mProgressBar;
     private TextView mTextView;
+    private Button mNextButton;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -50,7 +52,9 @@ public class LoadingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_loading);
 
         // Set receipt image in background.
-        mReceiptPicture = Receipt.receiptBitmap;
+        mReceiptPicture = Receipt.getReceiptBitmap();
+        if(mReceiptPicture == null)
+            super.finish();
 
         mImageView = (ImageView) findViewById(R.id.imageViewLoading);
         mImageView.setImageBitmap(mReceiptPicture);
@@ -58,6 +62,7 @@ public class LoadingActivity extends AppCompatActivity {
         // Progress bar
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mTextView = (TextView) findViewById(R.id.tvRecognisedText);
+        mNextButton = (Button) findViewById(R.id.btnNext);
 
         // START thread to do back ground operations
         startOperation();
@@ -69,18 +74,25 @@ public class LoadingActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.GONE);
 
         // testing, display recognised text
-        if(!mRecognizedText.isEmpty())
+        if(!mRecognizedText.isEmpty()) {
             mTextView.setText(mRecognizedText);
+            mNextButton.setVisibility(View.VISIBLE);
+        }
         mImageView.setVisibility(View.GONE);
 
-        //Receipt.recognizedText = mRecognizedText;
-        //startBillSplitting();
+        // Store receipt text
+        Receipt.setRecognizedText(mRecognizedText);
+        startBillSplitting();
     }
 
     public void startBillSplitting(){
-        // TODO: STORE RECEIPT RESULT?
         Intent intent = new Intent(this, BillSplitterActivity.class);
         startActivity(intent);
+    }
+
+    // for onClick of Next button
+    public void startBillSplitting(View view) {
+        startBillSplitting();
     }
 
     // Start thread to run Tesseract
@@ -89,9 +101,11 @@ public class LoadingActivity extends AppCompatActivity {
         mThread = new Thread(new Runnable() {
             public void run() {
                 // start Tesseract thread to detect text.
-                TesseractDetectText();
-
-                // TODO: CLEAN UP DATA
+                try {
+                    TesseractDetectText();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 // Post message to handler to signal complete operation
                 mHandler.sendEmptyMessage(0);
@@ -100,7 +114,7 @@ public class LoadingActivity extends AppCompatActivity {
         mThread.start();
     }
 
-    public void TesseractDetectText() {
+    public void TesseractDetectText() throws InterruptedException {
         // create tessdata directory
         File tessDir = new File(Environment.getExternalStorageDirectory().getPath() + "/tessdata");
         if (!tessDir.exists()) {
@@ -132,7 +146,7 @@ public class LoadingActivity extends AppCompatActivity {
         }
 
         TessBaseAPI tessBaseAPI = new TessBaseAPI();
-        tessBaseAPI.setDebug(true);
+        //tessBaseAPI.setDebug(true);
         tessBaseAPI.init(path, lang); //Init the Tess with the trained data file, with english language
 
         // Set the Receipt image

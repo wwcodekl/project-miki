@@ -1,0 +1,9 @@
+<resources>
+
+    <color name="primary_darker">#550000</color>
+    <color name="primary_dark">#800000</color>
+    <color name="primary_light">#D35F5F</color>
+    <color name="secondary_dark">#AA0000</color>
+    <color name="secondary_light">#E9AFAF</color>
+    <color name="background">#F4D7D7</color>
+</resources>

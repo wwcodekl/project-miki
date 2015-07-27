@@ -1,6 +1,168 @@
-<android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
-                                   xmlns:tools="http://schemas.android.com/tools"
-                                   android:id="@+id/pager"
-                                   android:layout_width="match_parent"
-                                   android:layout_height="match_parent"
-                                   tools:context="wwckl.projectmiki.activity.BillSplitterActivity"/>
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin">
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:id="@+id/scrollItemized"
+        android:layout_weight="20"
+        android:fadeScrollbars="false">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/layoutItemized">
+            <CheckBox
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/select_all"
+                android:id="@+id/cbSelectAll"
+                android:onClick="onSelectAllChkBoxClicked"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layoutTotals"
+        android:layout_weight="1">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/subtotal"
+            android:id="@+id/tvSubTotal"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/total"
+            android:id="@+id/tvTotal"
+            android:layout_below="@+id/tvSubTotal"
+            android:layout_alignRight="@+id/tvSubTotal"
+            android:layout_alignEnd="@+id/tvSubTotal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/svc"
+            android:id="@+id/tvSVC"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/gst"
+            android:id="@+id/tvGST"
+            android:layout_below="@+id/tvSVC"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/bill_split_instructions"
+        android:id="@+id/tvInstructions"
+        android:textColor="@color/secondary_light"
+        style="@style/Base.Theme.AppCompat.Dialog" />
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:id="@+id/scrollSummary"
+        android:layout_weight="10"
+        android:fadeScrollbars="false"
+        android:scrollbarStyle="outsideInset"
+        android:visibility="gone"
+        android:padding="2dp"
+        android:clipToPadding="false">
+        <fragment
+            android:id="@+id/summaryFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            class="wwckl.projectmiki.fragment.SummaryFragment"
+            tools:layout="@layout/fragment_summary"/>
+    </ScrollView>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layoutSummary"
+        android:gravity="center_horizontal"
+        android:layout_weight="1"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/primary_dark_material_dark"
+            android:text="@string/dutch"
+            android:id="@+id/tvSplitType" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/primary_dark_material_dark"
+            android:id="@+id/spinnerSharing"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/primary_dark_material_dark"
+            android:text="@string/guest_init"
+            android:id="@+id/tvSummary"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_weight="1">
+        <Button
+            android:id="@+id/button_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/prev"
+            android:clickable="true"
+            android:onClick="previousGuest"
+            android:visibility="gone" />
+        <Button
+            android:id="@+id/button_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/next"
+            android:clickable="true"
+            android:onClick="nextGuest" />
+        <Button
+            android:id="@+id/button_done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/done"
+            android:clickable="true"
+            android:onClick="finishBillSplit" />
+
+    </LinearLayout>
+
+</LinearLayout>
