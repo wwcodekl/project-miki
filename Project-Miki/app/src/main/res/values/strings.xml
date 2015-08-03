@@ -89,6 +89,13 @@
     <string name="unknown_type">UNKNOWN TYPE</string>
 
     <!--- instructions -->
+    <string name="select_receipt_instructions">
+        Take a photo of receipt\n
+        or\n
+        Select an image from Gallery\n
+        or\n
+        Manually create bill
+    </string>
     <string name="crop_picture_instructions">Crop picture to quantity, items, price and total</string>
     <string name="adjust_picture_instructions">Adjust the brightness and the shade of grey for better detection</string>
     <string name="bill_split_instructions">

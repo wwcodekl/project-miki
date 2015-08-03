@@ -60,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
             0, 0, 0,  1, 0};
 
     private ImageView mImageView;
-    private TextView mTextView;
+    private TextView mSelectTextView;
+    private TextView mAdjustContrastTextView;
     private TextView mAdjustThresholdTextView;
     private SeekBar mColorThresholdBar;
     private SeekBar mContrastBar;
@@ -76,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Get layout objects for manipulation later.
-        mTextView = (TextView)findViewById(R.id.textView);
+        mSelectTextView = (TextView)findViewById(R.id.tvSelect);
+        mAdjustContrastTextView = (TextView)findViewById(R.id.tvAdjustContrast);
         mAdjustThresholdTextView = (TextView)findViewById(R.id.tvAdjustThreshold);
         mNextButton = (Button)findViewById(R.id.button_next);
 
@@ -145,10 +147,8 @@ public class MainActivity extends AppCompatActivity {
 
         if(mPicturePath.isEmpty()){
             // Prompt user to Get image of receipt
-            mTextView.setText(getString(R.string.take_a_photo_receipt)
-                    + "\n or \n"
-                    + getString(R.string.select_image_from_gallery));
-
+            mSelectTextView.setVisibility(View.VISIBLE);
+            mAdjustContrastTextView.setVisibility(View.INVISIBLE);
             mAdjustThresholdTextView.setVisibility(View.INVISIBLE);
             mContrastBar.setVisibility(View.INVISIBLE);
             mColorThresholdBar.setVisibility(View.INVISIBLE);
@@ -156,8 +156,8 @@ public class MainActivity extends AppCompatActivity {
             mNextButton.setEnabled(false);
         }
         else{ // image will be displayed, change text.
-            mTextView.setText(getString(R.string.adjust_contrast));
-
+            mSelectTextView.setVisibility(View.GONE);
+            mAdjustContrastTextView.setVisibility(View.VISIBLE);
             mAdjustThresholdTextView.setVisibility(View.VISIBLE);
             mContrastBar.setVisibility(View.VISIBLE);
             mColorThresholdBar.setVisibility(View.VISIBLE);
