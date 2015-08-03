@@ -320,6 +320,14 @@ public class EditFragment extends Fragment {
         int index = mBill.getListOfAllItems().size()-1;
         Item item = mBill.getListOfAllItems().get(index);
         addItemRow(item, index);
+
+        // Set focus to new row
+        TableRow row = (TableRow) mLayoutEditItems.getChildAt(index + 1);
+        if (row != null) {
+            EditText editText = (EditText) row.getChildAt(0);
+            if (editText != null)
+                editText.requestFocus();
+        }
     }
 
     public void deleteItem(int itemIndex) {

@@ -50,6 +50,10 @@
         <item name="edit">Edit</item>
     </string-array>
 
+    <string name="dutch_hint">Pay for own items</string>
+    <string name="treat_hint">Treat a person</string>
+    <string name="share_hint">Split amount evenly</string>
+
     <string name="receipt_picture">Receipt picture</string>
     <string name="recognised_text">Recognised text</string>
 
@@ -94,16 +98,19 @@
         4. Or click DONE to split using all remaining items
     </string>
     <string name="dutch_split_instructions">
+        DUTCH - Pay for own items\n
         1. Select items for first Guest\n
         2. Click NEXT to select items for next Guest\n
         3. Or click DONE to pay for the rest of the bill
     </string>
     <string name="treat_split_instructions">
+        TREAT - Treat a person\n
         1. Select items for the Guest you are treating\n
         2. Select the number of people that are sharing the treat\n
         3. Click NEXT to select items for the Guest that is treating
     </string>
     <string name="share_split_instructions">
+        SHARE - Split costs evenly\n
         1. Select items for sharing\n
         2. Select the number of people that are sharing the items\n
         3. Click NEXT for the next split option\n
