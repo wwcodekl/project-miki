@@ -27,10 +27,10 @@
     </style>
 
     <style name="CustomActionMode" parent="Widget.AppCompat.ActionBar">
-        <item name="android:background">@drawable/wwckl_title_background</item>
+        <item name="android:background">@drawable/background</item>
         <item name="android:height">?android:attr/actionBarSize</item>
         <!-- Support library compatibility -->
-        <item name="background">@drawable/wwckl_title_background</item>
+        <item name="background">@drawable/background</item>
         <item name="height">?android:attr/actionBarSize</item>
     </style>
 
@@ -57,10 +57,10 @@
 
     <style name="NoTitleActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:displayOptions">useLogo|showHome</item>
-        <item name="android:background">@drawable/wwckl_title_background</item>
+        <item name="android:background">@drawable/background</item>
         <!-- Support library compatibility -->
         <item name="displayOptions">useLogo|showHome</item>
-        <item name="background">@drawable/wwckl_title_background</item>
+        <item name="background">@drawable/background</item>
     </style>
 
     <style name="NoTitleActionBarMenuStyle" parent="TextAppearance.AppCompat.Widget.ActionBar.Menu">
@@ -70,9 +70,9 @@
 
     <style name="TitledActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:displayOptions">showTitle</item>
-        <item name="android:background">@drawable/wwckl_title_background</item>
+        <item name="android:background">@drawable/background</item>
         <!-- Support library compatibility -->
         <item name="displayOptions">showTitle</item>
-        <item name="background">@drawable/wwckl_title_background</item>
+        <item name="background">@drawable/background</item>
     </style>
 </resources>

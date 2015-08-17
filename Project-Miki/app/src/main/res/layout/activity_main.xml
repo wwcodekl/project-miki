@@ -26,7 +26,8 @@
         android:layout_height="wrap_content"
         android:text="@string/next"
         android:clickable="true"
-        android:onClick="startLoadingAcitivty" />
+        android:onClick="startLoadingAcitivty"
+        android:background="@color/background" />
     </RelativeLayout>
 
     <TextView
@@ -35,14 +36,17 @@
         android:layout_height="wrap_content"
         android:text="@string/select_receipt_instructions"
         android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/secondary_light"/>
+        android:textColor="@color/secondary_lighter"/>
 
     <TextView
         android:id="@+id/tvAdjustContrast"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/adjust_contrast"/>
+        android:text="@string/adjust_contrast"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/secondary_darker"/>
 
     <SeekBar
         android:layout_width="match_parent"
@@ -59,7 +63,9 @@
         android:id="@+id/tvAdjustThreshold"
         android:layout_below="@+id/contrastBar"
         android:layout_centerHorizontal="true"
-        android:text="@string/adjust_shades" />
+        android:text="@string/adjust_shades"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/secondary_darker"/>
 
     <SeekBar
         android:layout_width="match_parent"

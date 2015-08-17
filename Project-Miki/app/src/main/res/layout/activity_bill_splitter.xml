@@ -79,7 +79,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/bill_split_instructions"
         android:id="@+id/tvInstructions"
-        android:textColor="@color/secondary_light"
+        android:textColor="@color/secondary_lighter"
         style="@style/Base.Theme.AppCompat.Dialog" />
 
     <ScrollView
@@ -147,21 +147,26 @@
             android:text="@string/prev"
             android:clickable="true"
             android:onClick="previousGuest"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:background="@color/background"
+            android:layout_marginRight="@dimen/layout_horizontal_margin"/>
         <Button
             android:id="@+id/button_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/next"
             android:clickable="true"
-            android:onClick="nextGuest" />
+            android:onClick="nextGuest"
+            android:background="@color/background" />
         <Button
             android:id="@+id/button_done"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/done"
             android:clickable="true"
-            android:onClick="finishBillSplit" />
+            android:onClick="finishBillSplit"
+            android:background="@color/background"
+            android:layout_marginLeft="@dimen/layout_horizontal_margin"/>
 
     </LinearLayout>
 

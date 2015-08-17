@@ -2,6 +2,10 @@
 <resources>
 
     <string name="app_name">Split Bill Lah</string>
+    <string name="banner">Split Bill lah banner</string>
+    <string name="brought_to_you">Brought to you by: </string>
+    <string name="kuala_lumpur">Kuala Lumpur</string>
+
     <string name="next">Next</string>
     <string name="settings">Settings</string>
     <string name="help">Help</string>
@@ -99,7 +103,7 @@
     <string name="crop_picture_instructions">Crop picture to quantity, items, price and total</string>
     <string name="adjust_picture_instructions">Adjust the brightness and the shade of grey for better detection</string>
     <string name="bill_split_instructions">
-        1. Choose Split option at the top\n
+        1. Choose DUTCH, TREAT or SHARE\n
         2. Select items for each guest\n
         3. Click NEXT to select for next guest\n
         4. Or click DONE to split using all remaining items
@@ -113,14 +117,17 @@
     <string name="treat_split_instructions">
         TREAT - Treat a person\n
         1. Select items for the Guest you are treating\n
-        2. Select the number of people that are sharing the treat\n
+        2. Set the number of people that are sharing the treat\n
         3. Click NEXT to select items for the Guest that is treating
     </string>
     <string name="share_split_instructions">
         SHARE - Split costs evenly\n
         1. Select items for sharing\n
-        2. Select the number of people that are sharing the items\n
+        2. Set the number of people that are sharing the items\n
         3. Click NEXT for the next split option\n
         4. Or click DONE to share the entire bill
     </string>
+    <string name="title_activity_edit">EditActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 </resources>
