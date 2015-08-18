@@ -82,17 +82,17 @@ public class LoadingActivity extends AppCompatActivity {
 
         // Store receipt text
         Receipt.setRecognizedText(mRecognizedText);
-        startBillSplitting();
+        startEditActiviy();
     }
 
-    public void startBillSplitting(){
-        Intent intent = new Intent(this, BillSplitterActivity.class);
+    public void startEditActiviy(){
+        Intent intent = new Intent(this, EditActivity.class);
         startActivity(intent);
     }
 
     // for onClick of Next button
-    public void startBillSplitting(View view) {
-        startBillSplitting();
+    public void startEditActiviy(View view) {
+        startEditActiviy();
     }
 
     // Start thread to run Tesseract

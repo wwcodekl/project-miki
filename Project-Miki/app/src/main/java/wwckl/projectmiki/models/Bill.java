@@ -1,22 +1,19 @@
 package wwckl.projectmiki.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by cheeyim on 2/2/2015.
  */
-public class Bill {
+public class Bill implements Parcelable {
     final int fMaxGSTpercent = 21;
     final int fMinGSTpercent = 5;
     final int fMaxSVCpercent = 21;
@@ -111,6 +108,60 @@ public class Bill {
     }
 
     public Boolean getUseSubtotals() { return mUseSubtotals; }
+
+    public Bill() {}; // constructor
+
+    // ******************* PARCELABLE IMPLEMENTATION *******************
+    public static final Parcelable.Creator<Bill> CREATOR
+            = new Parcelable.Creator<Bill>() {
+
+        // This simply calls our new constructor (typically private) and
+        // passes along the unmarshalled `Parcel`, and then returns the new object!
+        @Override
+        public Bill createFromParcel(Parcel in) {
+            return new Bill(in);
+        }
+
+        // We just need to copy this and change the type to match our class.
+        @Override
+        public Bill[] newArray(int size) {
+            return new Bill[size];
+        }
+    };
+
+    public int describeContents() {
+        return 0;
+    }
+
+    private Bill(Parcel in) { readFromParcel(in); }
+
+    // parcel read and write must be in the exact same order
+    // Assumes new Edit Activity, therefore, mNoOfPplSharing and BillSplitStack is ignored for Parcel.
+    public void readFromParcel(Parcel in) {
+        mTotal = new BigDecimal(in.readString());
+        mSubTotal = new BigDecimal(in.readString());
+        mGST = new BigDecimal(in.readString());
+        mGSTpercent = in.readInt();
+        mSVC = new BigDecimal(in.readString());
+        mSVCpercent = in.readInt();
+        mAdjust = new BigDecimal(in.readString());
+        in.readTypedList(mListOfAllItems, Item.CREATOR);
+        mUseSubtotals = (in.readInt() == 0) ? false : true;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(mTotal.toString());
+        out.writeString(mSubTotal.toString());
+        out.writeString(mGST.toString());
+        out.writeInt(mGSTpercent);
+        out.writeString(mSVC.toString());
+        out.writeInt(mSVCpercent);
+        out.writeString(mAdjust.toString());
+        out.writeTypedList(mListOfAllItems);
+        out.writeInt((mUseSubtotals != null && mUseSubtotals) ? 1 : 0);
+    }
+    // ***************** END PARCELABLE IMPLEMENTATION *******************
 
     // add item to offset total
     protected void addOffsetItem(BigDecimal total) {
@@ -456,5 +507,6 @@ public class Bill {
     }
 
     // ******************* END EDIT FRAGMENT OPERATIONS ****************
+
 }
 

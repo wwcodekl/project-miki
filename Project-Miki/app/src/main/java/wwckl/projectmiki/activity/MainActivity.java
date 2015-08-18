@@ -385,7 +385,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Make sure recognized text is empty
         Receipt.setRecognizedText("");
-        Intent intentEdit = new Intent(this, BillSplitterActivity.class);
+        Intent intentEdit = new Intent(this, EditActivity.class);
         startActivity(intentEdit);
     }
 

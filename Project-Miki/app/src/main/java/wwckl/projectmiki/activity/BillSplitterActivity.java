@@ -119,22 +119,12 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             mInstructionsTextView.setVisibility(View.GONE);
 
         // Initialise Bill contents
-        if (Receipt.getRecognizedText().isEmpty()) {
-            // assume new bill
-            mBill = (Bill) new ParseBill("1 Item 1.00");
-            // no associated image
-            Receipt.setReceiptBitmap(null);
-            startEditFragment();
-        }
-        else {
-            mBill = (Bill) new ParseBill(Receipt.getRecognizedText());
-            drawItemizedLayout();
-            updateTotals();
-            if(!mBill.isBillBalanced()){
-                displayToast(getString(R.string.bill_not_balanced), false);
-            }
-            displayToast(getString(R.string.click_menu_to_edit_bill), true);
-        }
+        Bundle b = getIntent().getExtras();
+        mBill = b.getParcelable("Bill");
+
+        // initialise contents
+        drawItemizedLayout();
+        updateTotals();
     }
 
     @Override

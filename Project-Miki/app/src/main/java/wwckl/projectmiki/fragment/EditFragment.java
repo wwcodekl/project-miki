@@ -2,6 +2,7 @@ package wwckl.projectmiki.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -28,9 +30,11 @@ import java.math.BigDecimal;
 
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.activity.BillSplitterActivity;
+import wwckl.projectmiki.activity.EditActivity;
 import wwckl.projectmiki.activity.SettingsActivity;
 import wwckl.projectmiki.models.Bill;
 import wwckl.projectmiki.models.Item;
+import wwckl.projectmiki.models.ParseBill;
 import wwckl.projectmiki.models.Receipt;
 
 /**
@@ -43,6 +47,7 @@ public class EditFragment extends Fragment {
     private TableLayout mLayoutEditItems;
     private TableLayout mLayoutEditTotals;
     private BillSplitterActivity mBillSplitterActivity;
+    private EditActivity mEditActivity;
     private Bill mBill;
     private EditText mSubtotal;
     private EditText mGST;
@@ -143,9 +148,23 @@ public class EditFragment extends Fragment {
                 startActivity(myWebLink);
                 return true;
             case R.id.action_done:
+                // Hide keyboard if present
+                View view = this.getActivity().getCurrentFocus();
+                if (view!=null) {
+                    InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+                }
                 if (mBillSplitterActivity != null) {
                     mBillSplitterActivity.setActivityBill(mBill);
                     mBillSplitterActivity.fragmentSuicide();
+                }
+                else if (mEditActivity != null) {
+                    mEditActivity.startBillSplitting();
+                }
+                else {
+                    // Start bill splitter activity
+                    Intent intent = new Intent(this.getActivity(), BillSplitterActivity.class);
+                    startActivity(intent);
                 }
                 return true;
             default:
@@ -160,11 +179,16 @@ public class EditFragment extends Fragment {
         if (activity instanceof BillSplitterActivity) {
             mBillSplitterActivity = (BillSplitterActivity) activity;
             mBill = mBillSplitterActivity.getActivityBill();
+
+            mBillSplitterActivity.displayToast(getString(R.string.click_done_when_complete), true);
+        }
+        else if(activity instanceof EditActivity) {
+            mEditActivity = (EditActivity) activity;
+            mBill = mEditActivity.getActivityBill();
         }
         else {
             mBill = new Bill();
         }
-        mBillSplitterActivity.displayToast(getString(R.string.click_done_when_complete), true);
     }
 
     private void setOnFocusChangeListener(EditText editText){
@@ -301,7 +325,7 @@ public class EditFragment extends Fragment {
         Log.d("updateItems", Integer.toString(numOfItems));
 
         Item item = mBill.getListOfAllItems().get(numOfItems-1);
-        addItemRow(item, numOfItems-1);
+        addItemRow(item, numOfItems - 1);
     }
 
     private void updateTotals() {
@@ -346,4 +370,5 @@ public class EditFragment extends Fragment {
 
         updateTotals();
     }
+
 }

@@ -127,7 +127,7 @@
         3. Click NEXT for the next split option\n
         4. Or click DONE to share the entire bill
     </string>
-    <string name="title_activity_edit">EditActivity</string>
+    <string name="title_activity_edit">Please double check</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 </resources>
