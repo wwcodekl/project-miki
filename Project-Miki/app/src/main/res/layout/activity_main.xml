@@ -25,9 +25,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/next"
-        android:clickable="true"
+        android:enabled="true"
         android:onClick="startLoadingAcitivty"
-        android:background="@color/background" />
+        android:background="@drawable/button"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/primary_text_default_material_dark"/>
     </RelativeLayout>
 
     <TextView

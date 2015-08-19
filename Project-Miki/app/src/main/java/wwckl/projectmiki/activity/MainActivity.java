@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     final int RESUME_FROM_OTHER = 0;
     final int RESUME_FROM_CAMERA = 1;
     final int RESUME_FROM_GALLERY = 2;
+    final int RESUME_FROM_CROP = 3;
     final long fFileSizeToScale = 1000000; // 1 MB in bytes
 
     private int mResumeFrom = 0; // what instruction to display if any.
@@ -169,9 +170,11 @@ public class MainActivity extends AppCompatActivity {
 
             switch (mResumeFrom) {
                 case RESUME_FROM_CAMERA:
-                    displayToast(getString(R.string.crop_picture_instructions), true);
-                    break;
                 case RESUME_FROM_GALLERY:
+                    displayToast(getString(R.string.crop_picture_instructions), true);
+                    performCrop();
+                    break;
+                case RESUME_FROM_CROP:
                     displayToast(getString(R.string.adjust_picture_instructions), true);
                     break;
                 default:
@@ -403,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             // set instructions for after cropping
-            mResumeFrom = RESUME_FROM_GALLERY;
+            mResumeFrom = RESUME_FROM_CROP;
 
             //call the standard crop action intent (the user device may not support it)
             Intent cropIntent = new Intent("com.android.camera.action.CROP");
@@ -452,6 +455,9 @@ public class MainActivity extends AppCompatActivity {
                 0, 0, 0, 1, 0
         };
         applyFilter();
+
+        // allow user to start OCR
+        mNextButton.setEnabled(true);
     }
 
     // Get the threshold value to change image colors
@@ -462,6 +468,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mImageView.setImageBitmap(changeColor(mReceiptPicture, progress));
+
+        // allow user to start OCR
+        mNextButton.setEnabled(true);
     }
 
     // Change bitmap image colours to 4 shades: black, dark gray, light gray or white
