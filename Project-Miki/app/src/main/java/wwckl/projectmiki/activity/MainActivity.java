@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 adjustContrast(convertContrastValue(progress));
+                // allow user to start OCR
+                mNextButton.setEnabled(true);
             }
 
             @Override
@@ -106,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 adjustThreshold(progress);
+                // allow user to start OCR
+                mNextButton.setEnabled(true);
             }
 
             @Override
@@ -165,8 +169,6 @@ public class MainActivity extends AppCompatActivity {
 
             applyFilter();
             adjustThreshold(mColorThresholdBar.getProgress());
-
-            mNextButton.setEnabled(true);
 
             switch (mResumeFrom) {
                 case RESUME_FROM_CAMERA:
@@ -455,9 +457,6 @@ public class MainActivity extends AppCompatActivity {
                 0, 0, 0, 1, 0
         };
         applyFilter();
-
-        // allow user to start OCR
-        mNextButton.setEnabled(true);
     }
 
     // Get the threshold value to change image colors
@@ -468,9 +467,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mImageView.setImageBitmap(changeColor(mReceiptPicture, progress));
-
-        // allow user to start OCR
-        mNextButton.setEnabled(true);
     }
 
     // Change bitmap image colours to 4 shades: black, dark gray, light gray or white

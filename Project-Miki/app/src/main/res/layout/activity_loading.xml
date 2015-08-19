@@ -37,6 +37,8 @@
         android:onClick="startEditActiviy"
         android:visibility="gone"
         android:background="@drawable/button"
-        android:textColor="@color/primary_text_default_material_dark"/>
+        android:textColor="@color/primary_text_default_material_dark"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        />
 
 </RelativeLayout>

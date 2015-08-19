@@ -148,12 +148,7 @@ public class EditFragment extends Fragment {
                 startActivity(myWebLink);
                 return true;
             case R.id.action_done:
-                // Hide keyboard if present
-                View view = this.getActivity().getCurrentFocus();
-                if (view!=null) {
-                    InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
-                }
+                hideKeyboard();
                 if (mBillSplitterActivity != null) {
                     mBillSplitterActivity.setActivityBill(mBill);
                     mBillSplitterActivity.fragmentSuicide();
@@ -189,6 +184,15 @@ public class EditFragment extends Fragment {
         else {
             mBill = new Bill();
         }
+        // do not show keyboard on start of Edit. Allow user to check first.
+        hideKeyboard();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // do not show keyboard on start of Edit. Allow user to check first.
+        hideKeyboard();
     }
 
     private void setOnFocusChangeListener(EditText editText){
@@ -213,7 +217,7 @@ public class EditFragment extends Fragment {
 
     public void setValueOfEditText(String text, int viewId)
     {
-        Log.d("onFocusChange", viewId + ":" + text );
+        Log.d("onFocusChange", viewId + ":" + text);
         if(text.isEmpty()) {
             text = "0";
         }
@@ -355,7 +359,7 @@ public class EditFragment extends Fragment {
     }
 
     public void deleteItem(int itemIndex) {
-        Log.d ("deleteItem", Integer.toString(itemIndex));
+        Log.d("deleteItem", Integer.toString(itemIndex));
         // delete item at location itemIndex
         mBill.deleteItem(itemIndex);
         mLayoutEditItems.removeViewAt(itemIndex + 1);
@@ -371,4 +375,11 @@ public class EditFragment extends Fragment {
         updateTotals();
     }
 
+    // Hide keyboard if present
+    private void hideKeyboard() {
+        if(getActivity().getCurrentFocus()!=null) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+        }
+    }
 }

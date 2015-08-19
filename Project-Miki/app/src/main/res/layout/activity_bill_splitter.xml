@@ -150,7 +150,8 @@
             android:visibility="gone"
             android:background="@drawable/button"
             android:layout_marginRight="@dimen/layout_horizontal_margin"
-            android:textColor="@color/primary_text_default_material_dark"/>
+            android:textColor="@color/primary_text_default_material_dark"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
         <Button
             android:id="@+id/button_next"
             android:layout_width="wrap_content"
@@ -159,7 +160,9 @@
             android:clickable="true"
             android:onClick="nextGuest"
             android:background="@drawable/button"
-            android:textColor="@color/primary_text_default_material_dark"/>
+            android:textColor="@color/primary_text_default_material_dark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            />
         <Button
             android:id="@+id/button_done"
             android:layout_width="wrap_content"
@@ -169,7 +172,9 @@
             android:onClick="finishBillSplit"
             android:background="@drawable/button"
             android:layout_marginLeft="@dimen/layout_horizontal_margin"
-            android:textColor="@color/primary_text_default_material_dark"/>
+            android:textColor="@color/primary_text_default_material_dark"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            />
 
     </LinearLayout>
 

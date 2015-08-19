@@ -2,6 +2,7 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:homeAsUpIndicator">@drawable/ic_home_icon</item>
         <item name="android:actionBarStyle">@style/TitledActionBarStyle</item>
         <item name="android:actionBarDivider">@null</item>
         <item name="android:windowActionModeOverlay">true</item>
@@ -34,13 +35,14 @@
         <item name="height">?android:attr/actionBarSize</item>
     </style>
 
-    <style name="action_button_done" parent="Widget.AppCompat.ActionButton.CloseMode">
+    <style name="action_button_done" parent="Widget.AppCompat.ActionButton">
         <item name="android:actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
         <item name="actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
         <item name="colorControlNormal">@color/primary_light</item>
     </style>
 
     <style name="BillSplitterTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:homeAsUpIndicator">@drawable/ic_home_icon</item>
         <item name="android:actionBarStyle">@style/NoTitleActionBarStyle</item>
         <item name="android:actionMenuTextAppearance">@style/NoTitleActionBarMenuStyle</item>
         <!-- Main theme colors -->
