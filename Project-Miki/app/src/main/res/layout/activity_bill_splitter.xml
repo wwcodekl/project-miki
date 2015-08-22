@@ -130,7 +130,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/primary_dark_material_dark"
-            android:text="@string/guest_init"
+            android:text="@string/amount_init"
             android:id="@+id/tvSummary"/>
     </LinearLayout>
 

@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar mContrastBar;
     private Button mNextButton;
     private SharedPreferences mSharedPrefs;
+    int mLtGray, mDkGray, mLightishGray, mDarkishGray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
         // get preference manager
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // get colors from resource
+        mLtGray = getResources().getColor(R.color.light_gray);
+        mDkGray = getResources().getColor(R.color.dark_gray);
+        mLightishGray = getResources().getColor(R.color.lightish_gray);
+        mDarkishGray = getResources().getColor(R.color.darkish_gray);
 
         // Get layout objects for manipulation later.
         mSelectTextView = (TextView)findViewById(R.id.tvSelect);
@@ -473,9 +480,11 @@ public class MainActivity extends AppCompatActivity {
     // We want contrasting shades, so no mid-shades such as gray.
     private Bitmap changeColor(Bitmap src, int progress) {
         final int absBlack = Math.abs(Color.BLACK);
-        final int absWhite = Math.abs(Color.WHITE);
+        final int white = Color.WHITE;
+        int gray;
         int absLtGray = Math.abs(Color.LTGRAY);
         int absDkGray = Math.abs(Color.DKGRAY);
+        int absGray = Math.abs(Color.GRAY);
         int width = src.getWidth();
         int height = src.getHeight();
         int[] pixels = new int[width * height];
@@ -489,13 +498,27 @@ public class MainActivity extends AppCompatActivity {
         //threshold to change to white or black
         threshold = factor * progress;
         if (progress < (maxProgress/2)){
-            absLtGray = threshold / 3 * 2;
-            absDkGray = threshold + (threshold - absLtGray);
+            absLtGray = threshold / 2;
+            absDkGray = threshold + ( (absBlack - threshold) / 3 * 2 );
+            absGray = threshold + ( (absDkGray - threshold) / 2 );
+            // set to darker gray.
+            gray = mDarkishGray;
         }
         else {
-            absDkGray = threshold + ((absBlack - threshold) / 3);
-            absLtGray = threshold - (absDkGray - threshold);
+            absDkGray = threshold + ((absBlack - threshold) / 2);
+            absLtGray = threshold / 3;
+            absGray = threshold;
+            threshold = absLtGray * 2;
+            gray = mLightishGray;
         }
+        // by end of calculations: white < ltGray < threshold < gray < dkGray < black
+
+        /* DEBUGGING
+        Log.d("color", "threshold " + Integer.toString(threshold));
+        Log.d("color", "absLtGray " + Integer.toString(absLtGray));
+        Log.d("color", "absGray   " + Integer.toString(absGray));
+        Log.d("color", "absDkGray " + Integer.toString(absDkGray));
+        */
 
         // get pixel array from source
         src.getPixels(pixels, 0, width, 0, 0, width, height);
@@ -509,16 +532,19 @@ public class MainActivity extends AppCompatActivity {
                 int index = y * width + x;
                 pixel = Math.abs(pixels[index]);
                 if(pixel < absLtGray){
-                    pixels[index] = Color.WHITE;
-                }
-                else if(pixel > absDkGray){
-                    pixels[index] = Color.BLACK;
+                    pixels[index] = white;
                 }
                 else if(pixel < threshold){
-                    pixels[index] = Color.LTGRAY;
+                    pixels[index] = mLtGray;
+                }
+                else if(pixel < absGray){
+                    pixels[index] = gray;
+                }
+                else if(pixel < absDkGray){
+                    pixels[index] = mDkGray;
                 }
                 else{
-                    pixels[index] = Color.DKGRAY;
+                    pixels[index] = Color.BLACK;
                 }
             }
         }

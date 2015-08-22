@@ -552,7 +552,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 if (remaingNumOfPplSharing > 0) {
                     amount = amount.add(mSummaryFragment.getTreatAmountPax());
                 }
-                summaryText = getString(R.string.guest) +" : $" + amount.toString();
+                summaryText = getString(R.string.amount) +": $" + amount.toString();
                 break;
             case TREAT_SHARE_TYPE:
             case SHARE_TYPE:
@@ -560,7 +560,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                     amount = amount.add(mSummaryFragment.getTreatAmountPax().multiply(BigDecimal.valueOf(remaingNumOfPplSharing)));
                 }
             case TREAT_TYPE:
-                summaryText = getString(R.string.guest) + "s : $" + amount.toString();
+                summaryText = "pax. " + getString(R.string.amount) + ": $" + amount.toString();
                 break;
             default:
                 break;

@@ -70,7 +70,7 @@
     <string name="gst">GST</string>
     <string name="svc">SVC</string>
     <string name="guest">Guest</string>
-    <string name="guest_init">Guest : $0</string>
+    <string name="amount_init">Amount : $0</string>
 
     <string name="edit_bill">Edit Bill</string>
     <string name="create_bill">Create Bill</string>
@@ -103,10 +103,10 @@
     <string name="crop_picture_instructions">Crop picture to quantity, items, price and total</string>
     <string name="adjust_picture_instructions">Adjust the brightness and the shade of grey for better detection</string>
     <string name="bill_split_instructions">
-        1. Choose DUTCH, TREAT or SHARE\n
-        2. Select items for each guest\n
-        3. Click NEXT to select for next guest\n
-        4. Or click DONE to split using all remaining items
+        Pick one:\n
+        \t DUTCH - Select each item and it\'s amount by person\n
+        \t TREAT - Select which item to split evenly + DUTCH or SHARE\n
+        \t SHARE - Split the total amount evenly to everyone
     </string>
     <string name="dutch_split_instructions">
         DUTCH - Pay for own items\n
@@ -130,4 +130,32 @@
     <string name="title_activity_edit">Please double check</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+    <string-array name="alphabets">
+        <item>A</item>
+        <item>B</item>
+        <item>C</item>
+        <item>D</item>
+        <item>E</item>
+        <item>F</item>
+        <item>G</item>
+        <item>H</item>
+        <item>I</item>
+        <item>J</item>
+        <item>K</item>
+        <item>L</item>
+        <item>M</item>
+        <item>N</item>
+        <item>O</item>
+        <item>P</item>
+        <item>Q</item>
+        <item>R</item>
+        <item>S</item>
+        <item>T</item>
+        <item>U</item>
+        <item>V</item>
+        <item>X</item>
+        <item>Y</item>
+        <item>Z</item>
+    </string-array>
 </resources>
