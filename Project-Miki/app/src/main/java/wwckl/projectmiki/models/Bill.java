@@ -201,7 +201,21 @@ public class Bill implements Parcelable {
         return percent.intValue();
     }
 
-    // return amount * 0.0x%
+    // Calculates the impliclit percentage of total = subAmount + fracAmount
+    protected int calculateImplicitPercent(BigDecimal fracAmount, BigDecimal total){
+        if (isZero(fracAmount))
+            return 0;
+        if (isZero(total))
+            return 0;
+
+        BigDecimal percent;
+        percent = total.subtract(fracAmount); // subtotal
+        percent = percent.multiply(BigDecimal.valueOf(100));
+        percent = fracAmount.divide(percent, 0, BigDecimal.ROUND_HALF_EVEN);
+        return percent.intValue();
+    }
+
+    // return amount * x%, where x is percent
     protected BigDecimal calculatePercentageAmount(BigDecimal amount, int percent) {
         BigDecimal percentageAmount = new BigDecimal(0.00);
 
@@ -212,6 +226,24 @@ public class Bill implements Parcelable {
 
         percentageAmount = amount.multiply(BigDecimal.valueOf(percent));
         percentageAmount = percentageAmount.divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_EVEN);
+
+        return percentageAmount;
+    }
+
+    // return the implicit amount of 0.0x% of subtotal
+    protected BigDecimal calculateImplicitPercentageAmount(BigDecimal amount, int percent) {
+        BigDecimal percentageAmount = new BigDecimal(0.00);
+        Integer tmpInt = 100;
+
+        if (isZero(amount))
+            return percentageAmount;
+        if (percent == 0)
+            return percentageAmount;
+
+        tmpInt += percent;
+        percentageAmount = amount.multiply(BigDecimal.valueOf(100));
+        percentageAmount = percentageAmount.divide(BigDecimal.valueOf(tmpInt), 2, BigDecimal.ROUND_HALF_EVEN); // subtotal
+        percentageAmount = amount.subtract(percentageAmount);
 
         return percentageAmount;
     }
@@ -421,6 +453,9 @@ public class Bill implements Parcelable {
         mSVC = amount;
         if (!isZero(mSubTotal))
             mSVCpercent = calculatePercent(mSVC, mSubTotal);
+        else
+            mSVCpercent = calculateImplicitPercent(mSVC.subtract(mGST), mTotal);
+
         if(mUseSubtotals)
             mTotal = sumOfTotals();
         return true;
@@ -434,6 +469,8 @@ public class Bill implements Parcelable {
         mSVCpercent = percent;
         if (!isZero(mSubTotal))
             mSVC = calculatePercentageAmount(mSubTotal, percent);
+        else
+            mSVC = calculateImplicitPercentageAmount(mTotal.subtract(mGST), percent);
         if(mUseSubtotals)
             mTotal = sumOfTotals();
         return true;
@@ -447,6 +484,9 @@ public class Bill implements Parcelable {
         mGST = amount;
         if (!isZero(mSubTotal))
             mGSTpercent = calculatePercent(mGST, mSubTotal.add(mSVC));
+        else
+            mGSTpercent = calculateImplicitPercent(mGST, mTotal);
+
         if(mUseSubtotals)
             mTotal = sumOfTotals();
         return true;
@@ -460,6 +500,9 @@ public class Bill implements Parcelable {
         mGSTpercent = percent;
         if (!isZero(mSubTotal))
             mGST = calculatePercentageAmount(mSubTotal.add(mSVC), percent);
+        else
+            mGST = calculateImplicitPercentageAmount(mTotal, percent);
+
         if(mUseSubtotals)
             mTotal = sumOfTotals();
         return true;

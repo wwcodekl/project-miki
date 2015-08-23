@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
@@ -360,9 +361,16 @@ public class EditFragment extends Fragment {
 
     public void deleteItem(int itemIndex) {
         Log.d("deleteItem", Integer.toString(itemIndex));
+
+        try {
+            mLayoutEditItems.removeViewAt(itemIndex + 1);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
         // delete item at location itemIndex
+        // needs to be done only after we have finished with the view
         mBill.deleteItem(itemIndex);
-        mLayoutEditItems.removeViewAt(itemIndex + 1);
 
         // and update the rest
         for (int i = (itemIndex+1); i < (mLayoutEditItems.getChildCount()); i++) {
@@ -377,9 +385,10 @@ public class EditFragment extends Fragment {
 
     // Hide keyboard if present
     private void hideKeyboard() {
-        if(getActivity().getCurrentFocus()!=null) {
+        View view = getActivity().getCurrentFocus();
+        if(view != null) {
             InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 }
