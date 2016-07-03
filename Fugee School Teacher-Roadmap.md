@@ -14,6 +14,7 @@ The BIG idea is to _**introduce**_ and _**inspire**_ students into Technology, s
 By the end of the semester, every student should complete their own web application of:
 - Something that solves their daily needs
 - Clone a website (e.g. google.com) - ideas from http://www.portfoliotips.co/portfolio-project-ideas/
+- HTML with JavaScript running on mobile phone browser
 - [OPEN FOR MORE FUN IDEAS]
 
 ## Sub Execution Plan
