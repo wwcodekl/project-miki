@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.models.Receipt;
 
@@ -33,10 +35,11 @@ public class LoadingActivity extends AppCompatActivity {
     private Bitmap mReceiptPicture = null;
     private String mRecognizedText = "Error 404: Not found";
 
-    private ImageView mImageView;
-    private ProgressBar mProgressBar;
-    private TextView mTextView;
-    private Button mNextButton;
+
+    @BindView(R.id.imageViewLoading) ImageView mImageView;
+    @BindView(R.id.tvRecognisedText) TextView mTextView;
+    @BindView(R.id.progressBar) ProgressBar mProgressBar;
+    @BindView(R.id.btnNext) Button mNextButton;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -50,19 +53,14 @@ public class LoadingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
+        ButterKnife.bind(this);
 
         // Set receipt image in background.
         mReceiptPicture = Receipt.getReceiptBitmap();
         if(mReceiptPicture == null)
             super.finish();
 
-        mImageView = (ImageView) findViewById(R.id.imageViewLoading);
         mImageView.setImageBitmap(mReceiptPicture);
-
-        // Progress bar
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mTextView = (TextView) findViewById(R.id.tvRecognisedText);
-        mNextButton = (Button) findViewById(R.id.btnNext);
 
         // START thread to do back ground operations
         startOperation();
