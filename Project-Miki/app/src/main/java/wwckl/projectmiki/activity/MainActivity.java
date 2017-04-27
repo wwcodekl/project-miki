@@ -1,8 +1,10 @@
 package wwckl.projectmiki.activity;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,6 +21,8 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -34,11 +38,17 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.OnLongClick;
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.models.Receipt;
+import wwckl.projectmiki.utils.RunTimePermission;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1001;
     final int REQUEST_INPUT_METHOD = 1;  // for checking of requestCode onActivityResult
     final int REQUEST_PICTURE_MEDIASTORE = 2;
     final int RESUME_FROM_OTHER = 0;
@@ -60,38 +70,31 @@ public class MainActivity extends AppCompatActivity {
             0.5f, 0.5f, 0.5f, 0, 0,
             0, 0, 0,  1, 0};
 
-    private ImageView mImageView;
-    private TextView mSelectTextView;
-    private TextView mAdjustContrastTextView;
-    private TextView mAdjustThresholdTextView;
-    private SeekBar mColorThresholdBar;
-    private SeekBar mContrastBar;
-    private Button mNextButton;
     private SharedPreferences mSharedPrefs;
     int mLtGray, mDkGray, mLightishGray, mDarkishGray;
+
+    @BindView(R.id.tvSelect) TextView mSelectTextView;
+    @BindView(R.id.imageView) ImageView mImageView;
+    @BindView(R.id.tvAdjustThreshold) TextView mAdjustThresholdTextView;
+    @BindView(R.id.tvAdjustContrast) TextView mAdjustContrastTextView;
+    @BindView(R.id.button_next) Button mNextButton;
+    @BindView(R.id.contrastBar) SeekBar mContrastBar;
+    @BindView(R.id.colorThresholdBar) SeekBar mColorThresholdBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         // get preference manager
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
         // get colors from resource
         mLtGray = getResources().getColor(R.color.light_gray);
         mDkGray = getResources().getColor(R.color.dark_gray);
         mLightishGray = getResources().getColor(R.color.lightish_gray);
         mDarkishGray = getResources().getColor(R.color.darkish_gray);
-
-        // Get layout objects for manipulation later.
-        mSelectTextView = (TextView)findViewById(R.id.tvSelect);
-        mAdjustContrastTextView = (TextView)findViewById(R.id.tvAdjustContrast);
-        mAdjustThresholdTextView = (TextView)findViewById(R.id.tvAdjustThreshold);
-        mNextButton = (Button)findViewById(R.id.button_next);
-
         // Setup Listener for Contrast Seek Bar
-        mContrastBar = (SeekBar)findViewById(R.id.contrastBar);
         mContrastBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -110,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Setup Color threshold bar setup Listener
-        mColorThresholdBar = (SeekBar)findViewById(R.id.colorThresholdBar);
         mColorThresholdBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -125,22 +127,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        // Set up listener for menu for onClick of Image
-        // to allow user to rotate and crop image
-        mImageView = (ImageView) findViewById(R.id.imageView);
-        mImageView.setOnLongClickListener(new View.OnLongClickListener() {
-            // Called when the user long-clicks on someView
-            public boolean onLongClick(View view) {
-                if (mActionMode != null) {
-                    return false;
-                }
-                // Start the CAB using the ActionMode.Callback defined above
-                mActionMode = MainActivity.this.startActionMode(mActionModeCallback);
-                view.setSelected(true);
-                return true;
             }
         });
 
@@ -246,6 +232,8 @@ public class MainActivity extends AppCompatActivity {
             // Retrieve Image from Gallery / Camera
             case REQUEST_PICTURE_MEDIASTORE:
                 if (resultCode == RESULT_OK && data != null) {
+                    Bitmap bmp = (Bitmap) data.getExtras().get("data");
+
                     mPictureUri = data.getData();
 
                     String[] filePathColumn = { MediaStore.Images.Media.DATA };
@@ -295,6 +283,10 @@ public class MainActivity extends AppCompatActivity {
                     // Display picture on screen
                     mImageView.setImageBitmap(mReceiptPicture);
                 }
+                break;
+            case MY_PERMISSIONS_REQUEST_CAMERA:
+
+
                 break;
 
             default:
@@ -371,10 +363,17 @@ public class MainActivity extends AppCompatActivity {
 
     // Start Camera
     private void startCamera() {
-        mResumeFrom = RESUME_FROM_CAMERA;
-        Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // start the image capture Intent
-        startActivityForResult(intentCamera, REQUEST_PICTURE_MEDIASTORE);
+
+        if (!RunTimePermission.checkHasPermission(this, Manifest.permission.CAMERA)) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    MY_PERMISSIONS_REQUEST_CAMERA);
+        } else {
+            mResumeFrom = RESUME_FROM_CAMERA;
+            Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            // start the image capture Intent
+            startActivityForResult(intentCamera, REQUEST_PICTURE_MEDIASTORE);
+        }
     }
 
     // onClick of next button
@@ -624,4 +623,17 @@ public class MainActivity extends AppCompatActivity {
         toast.setView(layout);
         toast.show();
     }
+
+    @OnLongClick(R.id.imageView)
+    public boolean onLongClickImage(View view){
+        if (mActionMode != null) {
+            return false ;
+        }
+        // Start the CAB using the ActionMode.Callback defined above
+        mActionMode = MainActivity.this.startActionMode(mActionModeCallback);
+        view.setSelected(true);
+        return true;
+    }
+
+
 }
