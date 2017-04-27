@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences mSharedPrefs;
     int mLtGray, mDkGray, mLightishGray, mDarkishGray;
 
-    @BindView(R.id.textView) TextView mTextView;
+    @BindView(R.id.tvSelect) TextView mSelectTextView;
     @BindView(R.id.imageView) ImageView mImageView;
     @BindView(R.id.tvAdjustThreshold) TextView mAdjustThresholdTextView;
     @BindView(R.id.tvAdjustContrast) TextView mAdjustContrastTextView;
@@ -232,6 +232,8 @@ public class MainActivity extends AppCompatActivity {
             // Retrieve Image from Gallery / Camera
             case REQUEST_PICTURE_MEDIASTORE:
                 if (resultCode == RESULT_OK && data != null) {
+                    Bitmap bmp = (Bitmap) data.getExtras().get("data");
+
                     mPictureUri = data.getData();
 
                     String[] filePathColumn = { MediaStore.Images.Media.DATA };
