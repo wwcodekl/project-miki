@@ -4,6 +4,9 @@
 
 # files for the dex VM
 *.dex
+# aar and iml files.
+*.iml
+*.aar
 
 # Mac files
 .DS_Store
