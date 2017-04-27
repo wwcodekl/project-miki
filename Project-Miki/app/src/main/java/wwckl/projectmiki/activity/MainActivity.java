@@ -594,7 +594,6 @@ public class MainActivity extends AppCompatActivity {
         toast.show();
     }
 
-
     @OnLongClick(R.id.imageView)
     public boolean onLongClickImage(View view){
         if (mActionMode != null) {
