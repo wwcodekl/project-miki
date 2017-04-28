@@ -22,7 +22,6 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,6 +40,7 @@ import butterknife.ButterKnife;
 import butterknife.OnLongClick;
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.models.Receipt;
+import wwckl.projectmiki.utils.MikiLogger;
 import wwckl.projectmiki.utils.RunTimePermission;
 
 
@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
                     mPicturePath = cursor.getString(columnIndex);
                     int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                     long fileSize = cursor.getLong(sizeIndex);
-                    Log.d("image fileSize", Long.toString(fileSize));
+                    MikiLogger.debug("image fileSize", Long.toString(fileSize));
                     cursor.close();
 
                     // We do not require high resolution images as it may cause OutOfMemoryError
@@ -329,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
             startEdit();
         }
         else {
-            Log.d("getReceiptImage", "NOT gallery/camera/manual.");
+            MikiLogger.debug("getReceiptImage", "NOT gallery/camera/manual.");
         }
     }
 
@@ -495,14 +495,6 @@ public class MainActivity extends AppCompatActivity {
             gray = mLightishGray;
         }
         // by end of calculations: white < ltGray < threshold < gray < dkGray < black
-
-        /* DEBUGGING
-        Log.d("color", "threshold " + Integer.toString(threshold));
-        Log.d("color", "absLtGray " + Integer.toString(absLtGray));
-        Log.d("color", "absGray   " + Integer.toString(absGray));
-        Log.d("color", "absDkGray " + Integer.toString(absDkGray));
-        */
-
         // get pixel array from source
         src.getPixels(pixels, 0, width, 0, 0, width, height);
         Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
