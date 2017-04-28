@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,7 +21,6 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -40,7 +38,6 @@ import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.OnLongClick;
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.models.Receipt;
@@ -86,15 +83,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        // get preference manager
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        // get colors from resource
         mLtGray = getResources().getColor(R.color.light_gray);
         mDkGray = getResources().getColor(R.color.dark_gray);
         mLightishGray = getResources().getColor(R.color.lightish_gray);
         mDarkishGray = getResources().getColor(R.color.darkish_gray);
-        // Setup Listener for Contrast Seek Bar
         mContrastBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -130,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // if this is the first time loading this activity
         if (savedInstanceState == null) {
             // Check to run Welcome Activity
             // or retrieve default input method
@@ -138,13 +130,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // on returning to activity from another activity.
     @Override
     public void onResume() {
-        super.onResume();  // Always call the superclass method first
+        super.onResume();
 
         if(mPicturePath.isEmpty()){
-            // Prompt user to Get image of receipt
             mSelectTextView.setVisibility(View.VISIBLE);
             mAdjustContrastTextView.setVisibility(View.INVISIBLE);
             mAdjustThresholdTextView.setVisibility(View.INVISIBLE);
@@ -297,7 +287,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-    // Confirm exit application on back button by requesting BACK again.
         if (mDoubleBackToExitPressedOnce) {
             super.onBackPressed();
             return;
@@ -329,9 +318,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // retrieves the receipt image
     private void getReceiptPicture() {
-        // Retrieve image
         if (mInputMethod.equalsIgnoreCase(getString(R.string.gallery))) {
             startGallery();
         }
@@ -346,13 +333,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // display welcome activity and returns with result
     public void startWelcomeActivity() {
         Intent intentInputMethod = new Intent(MainActivity.this, WelcomeActivity.class);
         startActivityForResult(intentInputMethod, REQUEST_INPUT_METHOD);
     }
 
-    // start gallery
     private void startGallery() {
         mResumeFrom = RESUME_FROM_GALLERY;
         Intent intentGallery = new Intent(
@@ -361,7 +346,6 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intentGallery, REQUEST_PICTURE_MEDIASTORE);
     }
 
-    // Start Camera
     private void startCamera() {
 
         if (!RunTimePermission.checkHasPermission(this, Manifest.permission.CAMERA)) {
@@ -551,9 +535,6 @@ public class MainActivity extends AppCompatActivity {
         return bmOut;
     }
 
-    // Setting up call backs for Action Bar that will
-    // overlay existing when long click on image
-    // for editing of image. rotate/crop
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
         // Called when the action mode is created; startActionMode() was called
@@ -565,14 +546,11 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        // Called each time the action mode is shown. Always called after onCreateActionMode, but
-        // may be called multiple times if the mode is invalidated.
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             return false; // Return false if nothing is done
         }
 
-        // Called when the user selects a contextual menu item
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 
