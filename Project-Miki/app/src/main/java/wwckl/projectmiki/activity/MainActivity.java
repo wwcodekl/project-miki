@@ -2,6 +2,7 @@ package wwckl.projectmiki.activity;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -32,6 +33,8 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.ByteArrayOutputStream;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -215,9 +218,12 @@ public class MainActivity extends AppCompatActivity {
 
             case REQUEST_PICTURE_MEDIASTORE:
                 if (resultCode == RESULT_OK && data != null) {
-                    Bitmap bmp = (Bitmap) data.getExtras().get("data");
-
-                    mPictureUri = data.getData();
+                    if(data.getData() == null){
+                        Bitmap bmp = (Bitmap) data.getExtras().get("data");
+                        mPictureUri = getImageUri(MainActivity.this, bmp);
+                    }else {
+                        mPictureUri = data.getData();
+                    }
 
                     String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
@@ -337,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!RunTimePermission.checkHasPermission(this, Manifest.permission.CAMERA)) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA},
+                    new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     MY_PERMISSIONS_REQUEST_CAMERA);
         } else {
             mResumeFrom = RESUME_FROM_CAMERA;
@@ -584,5 +590,11 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
 
 }
