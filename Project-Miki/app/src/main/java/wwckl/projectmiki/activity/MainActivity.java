@@ -2,9 +2,8 @@ package wwckl.projectmiki.activity;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,13 +17,10 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,12 +34,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.OnLongClick;
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.models.Receipt;
+import wwckl.projectmiki.utils.MikiLogger;
+import wwckl.projectmiki.utils.PreferenceUtils;
 import wwckl.projectmiki.utils.RunTimePermission;
 
 
@@ -70,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             0.5f, 0.5f, 0.5f, 0, 0,
             0, 0, 0,  1, 0};
 
-    private SharedPreferences mSharedPrefs;
     int mLtGray, mDkGray, mLightishGray, mDarkishGray;
 
     @BindView(R.id.tvSelect) TextView mSelectTextView;
@@ -86,15 +84,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        // get preference manager
-        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        // get colors from resource
         mLtGray = getResources().getColor(R.color.light_gray);
         mDkGray = getResources().getColor(R.color.dark_gray);
         mLightishGray = getResources().getColor(R.color.lightish_gray);
         mDarkishGray = getResources().getColor(R.color.darkish_gray);
-        // Setup Listener for Contrast Seek Bar
         mContrastBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -130,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // if this is the first time loading this activity
         if (savedInstanceState == null) {
             // Check to run Welcome Activity
             // or retrieve default input method
@@ -138,13 +130,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // on returning to activity from another activity.
     @Override
     public void onResume() {
-        super.onResume();  // Always call the superclass method first
+        super.onResume();
 
-        if(mPicturePath.isEmpty()){
-            // Prompt user to Get image of receipt
+        if (mPicturePath.isEmpty()) {
             mSelectTextView.setVisibility(View.VISIBLE);
             mAdjustContrastTextView.setVisibility(View.INVISIBLE);
             mAdjustThresholdTextView.setVisibility(View.INVISIBLE);
@@ -152,8 +142,7 @@ public class MainActivity extends AppCompatActivity {
             mColorThresholdBar.setVisibility(View.INVISIBLE);
 
             mNextButton.setEnabled(false);
-        }
-        else{ // image will be displayed, change text.
+        } else { // image will be displayed, change text.
             mSelectTextView.setVisibility(View.GONE);
             mAdjustContrastTextView.setVisibility(View.VISIBLE);
             mAdjustThresholdTextView.setVisibility(View.VISIBLE);
@@ -216,27 +205,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch(requestCode) {
+        switch (requestCode) {
             // Retrieve Result from Welcome Screen
             case REQUEST_INPUT_METHOD:
                 if (resultCode == RESULT_OK) {
                     mInputMethod = data.getStringExtra("result_input_method");
+                } else {
+                    mInputMethod = PreferenceUtils.getInstance(MainActivity.this).getPreferredInputMethod(getString(R.string.gallery));
                 }
-                else {
-                    mInputMethod = mSharedPrefs.getString("pref_input_method", getString(R.string.gallery));
-                }
-                // Get receipt image based on selected/default input method.
                 getReceiptPicture();
                 break;
 
-            // Retrieve Image from Gallery / Camera
             case REQUEST_PICTURE_MEDIASTORE:
                 if (resultCode == RESULT_OK && data != null) {
-                    Bitmap bmp = (Bitmap) data.getExtras().get("data");
+                    if(data.getData() == null){
+                        Bitmap bmp = (Bitmap) data.getExtras().get("data");
+                        mPictureUri = getImageUri(MainActivity.this, bmp);
+                    }else {
+                        mPictureUri = data.getData();
+                    }
 
-                    mPictureUri = data.getData();
-
-                    String[] filePathColumn = { MediaStore.Images.Media.DATA };
+                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
                     Cursor cursor = getContentResolver().query(mPictureUri,
                             null, null, null, null);
@@ -246,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                     mPicturePath = cursor.getString(columnIndex);
                     int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                     long fileSize = cursor.getLong(sizeIndex);
-                    Log.d("image fileSize", Long.toString(fileSize));
+                    MikiLogger.debug("image fileSize", Long.toString(fileSize));
                     cursor.close();
 
                     // We do not require high resolution images as it may cause OutOfMemoryError
@@ -297,7 +286,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-    // Confirm exit application on back button by requesting BACK again.
         if (mDoubleBackToExitPressedOnce) {
             super.onBackPressed();
             return;
@@ -315,44 +303,34 @@ public class MainActivity extends AppCompatActivity {
         }, 2000);
     }
 
-    // retrieves the selected or default input method
     private void getDefaultInputMethod() {
-        boolean displayWelcome = mSharedPrefs.getBoolean(getString(R.string.pref_display_welcome), true);
+        boolean displayWelcome = PreferenceUtils.getInstance(this).getDisplayWelcomeScreen();
 
         if (displayWelcome) {
             startWelcomeActivity();
-        }
-        else {
-            mInputMethod = mSharedPrefs.getString(getString(R.string.pref_input_method), getString(R.string.gallery));
-            // Get receipt image based on selected/default input method.
+        } else {
+            mInputMethod = PreferenceUtils.getInstance(this).getPreferredInputMethod(getString(R.string.gallery));
             getReceiptPicture();
         }
     }
 
-    // retrieves the receipt image
     private void getReceiptPicture() {
-        // Retrieve image
         if (mInputMethod.equalsIgnoreCase(getString(R.string.gallery))) {
             startGallery();
-        }
-        else if (mInputMethod.equalsIgnoreCase(getString(R.string.camera))) {
+        } else if (mInputMethod.equalsIgnoreCase(getString(R.string.camera))) {
             startCamera();
-        }
-        else if (mInputMethod.equalsIgnoreCase(getString(R.string.edit))) {
+        } else if (mInputMethod.equalsIgnoreCase(getString(R.string.edit))) {
             startEdit();
-        }
-        else {
-            Log.d("getReceiptImage", "NOT gallery/camera/manual.");
+        } else {
+            MikiLogger.debug("getReceiptImage", "NOT gallery/camera/manual.");
         }
     }
 
-    // display welcome activity and returns with result
     public void startWelcomeActivity() {
         Intent intentInputMethod = new Intent(MainActivity.this, WelcomeActivity.class);
         startActivityForResult(intentInputMethod, REQUEST_INPUT_METHOD);
     }
 
-    // start gallery
     private void startGallery() {
         mResumeFrom = RESUME_FROM_GALLERY;
         Intent intentGallery = new Intent(
@@ -361,12 +339,11 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intentGallery, REQUEST_PICTURE_MEDIASTORE);
     }
 
-    // Start Camera
     private void startCamera() {
 
         if (!RunTimePermission.checkHasPermission(this, Manifest.permission.CAMERA)) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA},
+                    new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     MY_PERMISSIONS_REQUEST_CAMERA);
         } else {
             mResumeFrom = RESUME_FROM_CAMERA;
@@ -381,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
         // clear instructions flag
         mResumeFrom = RESUME_FROM_OTHER;
 
-        if (mColorThresholdBar.getProgress() >0)
+        if (mColorThresholdBar.getProgress() > 0)
             mReceiptPicture = changeColor(mReceiptPicture, mColorThresholdBar.getProgress());
 
         Receipt.setReceiptBitmap(setFilter(mReceiptPicture));
@@ -400,7 +377,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intentEdit);
     }
 
-    /*----------- FUNCTIONS FOR IMAGE MANIPULATION: -------------*/
 
     private Bitmap RotateBitmap(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
@@ -408,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
-    private void performCrop(){
+    private void performCrop() {
         if (mPictureUri == null)
             return;
 
@@ -421,27 +397,26 @@ public class MainActivity extends AppCompatActivity {
             cropIntent.setDataAndType(mPictureUri, "image/*");
 
             startActivityForResult(cropIntent, REQUEST_PICTURE_MEDIASTORE);
-        }
-        catch(ActivityNotFoundException anfe){
+        } catch (ActivityNotFoundException anfe) {
             //display an error message
             displayToast(getString(R.string.crop_error_message), false);
         }
     }
 
     // adjust imageView filter, do not set image with filter yet
-    private void applyFilter(){
+    private void applyFilter() {
         ColorFilter colorFilter = new ColorMatrixColorFilter(mColorMatrix);
         mImageView.setColorFilter(colorFilter);
     }
 
     // set the Image with new filter, before proceed to next activity
-    private Bitmap setFilter(Bitmap bitmapToConvert){
-        ColorMatrixColorFilter colorFilter= new ColorMatrixColorFilter(mColorMatrix);
+    private Bitmap setFilter(Bitmap bitmapToConvert) {
+        ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(mColorMatrix);
         Bitmap bitmap = bitmapToConvert.copy(Bitmap.Config.ARGB_8888, true);
-        Paint paint=new Paint();
+        Paint paint = new Paint();
         paint.setColorFilter(colorFilter);
 
-        Canvas myCanvas =new Canvas(bitmap);
+        Canvas myCanvas = new Canvas(bitmap);
         myCanvas.drawBitmap(bitmap, 0, 0, paint);
 
         return bitmap;
@@ -454,8 +429,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Adjust the contrast
-    private void adjustContrast(float contrast)
-    {
+    private void adjustContrast(float contrast) {
         mColorMatrix = new float[]{
                 contrast, 0.5f, 0.5f, 0, 0,
                 0.5f, contrast, 0.5f, 0, 0,
@@ -466,8 +440,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Get the threshold value to change image colors
-    private void adjustThreshold(int progress){
-        if((progress == 0) || (progress == mColorThresholdBar.getMax())) {
+    private void adjustThreshold(int progress) {
+        if ((progress == 0) || (progress == mColorThresholdBar.getMax())) {
             mImageView.setImageBitmap(mReceiptPicture);
             return;
         }
@@ -496,14 +470,13 @@ public class MainActivity extends AppCompatActivity {
 
         //threshold to change to white or black
         threshold = factor * progress;
-        if (progress < (maxProgress/2)){
+        if (progress < (maxProgress / 2)) {
             absLtGray = threshold / 2;
-            absDkGray = threshold + ( (absBlack - threshold) / 3 * 2 );
-            absGray = threshold + ( (absDkGray - threshold) / 2 );
+            absDkGray = threshold + ((absBlack - threshold) / 3 * 2);
+            absGray = threshold + ((absDkGray - threshold) / 2);
             // set to darker gray.
             gray = mDarkishGray;
-        }
-        else {
+        } else {
             absDkGray = threshold + ((absBlack - threshold) / 2);
             absLtGray = threshold / 3;
             absGray = threshold;
@@ -511,14 +484,6 @@ public class MainActivity extends AppCompatActivity {
             gray = mLightishGray;
         }
         // by end of calculations: white < ltGray < threshold < gray < dkGray < black
-
-        /* DEBUGGING
-        Log.d("color", "threshold " + Integer.toString(threshold));
-        Log.d("color", "absLtGray " + Integer.toString(absLtGray));
-        Log.d("color", "absGray   " + Integer.toString(absGray));
-        Log.d("color", "absDkGray " + Integer.toString(absDkGray));
-        */
-
         // get pixel array from source
         src.getPixels(pixels, 0, width, 0, 0, width, height);
         Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
@@ -530,19 +495,15 @@ public class MainActivity extends AppCompatActivity {
                 // get current index in 2D-matrix
                 int index = y * width + x;
                 pixel = Math.abs(pixels[index]);
-                if(pixel < absLtGray){
+                if (pixel < absLtGray) {
                     pixels[index] = white;
-                }
-                else if(pixel < threshold){
+                } else if (pixel < threshold) {
                     pixels[index] = mLtGray;
-                }
-                else if(pixel < absGray){
+                } else if (pixel < absGray) {
                     pixels[index] = gray;
-                }
-                else if(pixel < absDkGray){
+                } else if (pixel < absDkGray) {
                     pixels[index] = mDkGray;
-                }
-                else{
+                } else {
                     pixels[index] = Color.BLACK;
                 }
             }
@@ -551,9 +512,6 @@ public class MainActivity extends AppCompatActivity {
         return bmOut;
     }
 
-    // Setting up call backs for Action Bar that will
-    // overlay existing when long click on image
-    // for editing of image. rotate/crop
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
         // Called when the action mode is created; startActionMode() was called
@@ -565,14 +523,11 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        // Called each time the action mode is shown. Always called after onCreateActionMode, but
-        // may be called multiple times if the mode is invalidated.
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             return false; // Return false if nothing is done
         }
 
-        // Called when the user selects a contextual menu item
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 
@@ -605,7 +560,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayToast(String toastString, Boolean isHelper) {
         if (isHelper) {
-            boolean displayHelper = mSharedPrefs.getBoolean(getString(R.string.pref_show_help_messages), true);
+            boolean displayHelper = PreferenceUtils.getInstance(this).getShowHelpMessage();
 
             if (!displayHelper)
                 return;
@@ -625,9 +580,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnLongClick(R.id.imageView)
-    public boolean onLongClickImage(View view){
+    public boolean onLongClickImage(View view) {
         if (mActionMode != null) {
-            return false ;
+            return false;
         }
         // Start the CAB using the ActionMode.Callback defined above
         mActionMode = MainActivity.this.startActionMode(mActionModeCallback);
@@ -635,5 +590,11 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
 
 }
