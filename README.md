@@ -1,10 +1,7 @@
-Idea:-
-------
-https://github.com/WomenWhoCode/KL-network/wiki/Project-Miki
+## The Idea
+This is an open project to create an Android application to allow user the ability to split bill by taking a photo of the receipt  after those gatherings with friends and family in a fun and simple way!
 
-This is an open project to create an Android application to allow user the ability to split bill by taking a photo of the receipt  after those gatherings with friends and family in a fun and simple way! 
-
-Features:-
+### Features
 1. Using phone's camera to capture Receipts
 2. Import photos from photo gallery
 3. Read the items and amount from the receipt
@@ -16,8 +13,8 @@ Features:-
 
 Android version supported - Android 4.1 Jelly Bean and above
 
-Project Structure:- 
-
+### Project Structure
+```
 ├─ external libraries
 ├─ app
 │  ├─ libs
@@ -33,9 +30,9 @@ Project Structure:-
 │  └─ proguard-rules.pro
 ├─ build.gradle
 └─ settings.gradle
-
-Java Packages Architecture:-
-
+```
+### Java Packages Architecture
+```
 wwckl/projectmiki
 ├─ models
 ├─ utils
@@ -45,13 +42,13 @@ wwckl/projectmiki
    ├─ actionbar
    ├─ widgets
    └─ notifications
+```
+### High-level Technical Req
+1. [Project Miki Wiki](https://github.com/wwcodekl/project-miki-android/wiki)
+2. OCR - https://code.google.com/p/tesseract-ocr/
+3. Android Resources - https://source.android.com/, http://developer.android.com/training/basics/firstapp/index.html
 
-High-level Technical Req:-
---------------------------
-1. OCR - https://code.google.com/p/tesseract-ocr/
-2. Android Resources: - https://source.android.com/, http://developer.android.com/training/basics/firstapp/index.html
- 
 Project Management Tools - https://trello.com/b/eTg0MwUT/project-miki
 
-Reference:-
-https://github.com/futurice/android-best-practices
+Reference:
+Android Best Practices - https://github.com/futurice/android-best-practices
