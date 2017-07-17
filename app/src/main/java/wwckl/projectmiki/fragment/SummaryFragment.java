@@ -215,7 +215,7 @@ public class SummaryFragment extends Fragment {
                 }
                 else {
                     v.setSelected(true);
-                    v.setBackgroundColor(getResources().getColor(R.color.background));
+                    v.setBackgroundColor(getResources().getColor(R.color.primary_light));
                     mBillSplitterActivity.highlightSplitItems(v.getId(), true);
                 }
                 Log.d("onClick tv", Integer.toString(v.getId()));

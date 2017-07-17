@@ -20,16 +20,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
-    <Button
-        android:id="@+id/button_next"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/next"
-        android:enabled="true"
-        android:onClick="startLoadingAcitivty"
-        android:background="@drawable/button"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/primary_text_default_material_dark"/>
+
+        <Button
+            android:id="@+id/button_next"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/background"
+            android:enabled="true"
+            android:onClick="startLoadingAcitivty"
+            android:text="@string/next"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/primary_text_default_material_dark" />
     </RelativeLayout>
 
     <TextView
