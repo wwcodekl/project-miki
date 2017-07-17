@@ -730,7 +730,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             if (checkBox != null) {
                 if (item.getGuestIndex() == index) {
                     if (setSelected)
-                        checkBox.setBackgroundColor(getResources().getColor(R.color.background));
+                        checkBox.setBackgroundColor(getResources().getColor(R.color.primary_light));
                     else
                         checkBox.setBackgroundColor(getResources().getColor(R.color.background_material_light));
                 }
