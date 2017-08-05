@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="fill_parent"
@@ -24,177 +25,70 @@
             android:adjustViewBounds="true"
             android:contentDescription="@string/receipt" />
     </ScrollView>
+
     <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
         android:id="@+id/scrollItemized"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="49.50"
         android:fadeScrollbars="false">
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:stretchColumns="0,1"
-                android:shrinkColumns="0"
-                android:id="@+id/layoutEditItems">
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/trAddItem">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/description"
-                        android:id="@+id/tvItemDesc" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/amount"
-                        android:id="@+id/tvItemAmt" />
-                    <ImageButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/imageButton"
-                        android:src="@drawable/ic_add_black_18dp"
-                        android:contentDescription="@string/add_item"
-                        android:visibility="invisible" />
-                </TableRow>
 
-            </TableLayout>
+        <TableLayout
+            android:id="@+id/layoutEditItems"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:shrinkColumns="0"
+            android:stretchColumns="0,1">
+
+            <TableRow
+                android:id="@+id/trAddItem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tvItemDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/description"
+                    android:textSize="@dimen/text_size_medium" />
+
+                <TextView
+                    android:id="@+id/tvItemAmt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/amount"
+                    android:textSize="@dimen/text_size_medium" />
+
+                <ImageButton
+                    android:id="@+id/imageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/add_item"
+                    android:src="@drawable/ic_add_black_18dp"
+                    android:visibility="invisible" />
+            </TableRow>
+
+        </TableLayout>
     </ScrollView>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <CheckBox
-            android:id="@+id/cbUseSubtotals"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:text="@string/calculate_gst_svc" />
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/layoutEditTotals"
+    <include
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/gray_80">
+        android:id="@+id/layoutEditTotals"
+        layout="@layout/layout_edit_totals"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior" />
 
-        <LinearLayout
-            android:id="@+id/llayoutGstSvc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/gray_77"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/text_vertical_margin"
-            android:paddingLeft="@dimen/text_horizontal_margin"
-            android:paddingRight="@dimen/text_horizontal_margin"
-            android:paddingTop="@dimen/text_vertical_margin">
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabEditDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        app:backgroundTint="@color/background"
+        app:fabSize="normal"
+        app:srcCompat="@drawable/ic_account_balance_wallet_white_24dp"
+        app:layout_anchor="@id/layoutEditTotals"
+        app:layout_anchorGravity="top|right|end" />
 
-            <TextView
-                android:id="@+id/tvGST"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:text="@string/gst_percent"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="12sp" />
 
-            <EditText
-                android:id="@+id/etGstPercent"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:selectAllOnFocus="true"
-                android:text="@string/percent_init" />
-
-            <TextView
-                android:id="@+id/tvSVC"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:text="@string/svc_percent"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="12sp" />
-
-            <EditText
-                android:id="@+id/etSvcPercent"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:selectAllOnFocus="true"
-                android:text="@string/percent_init" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llayoutSubtotal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/llayoutTotal"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:background="@color/gray_80"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/text_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin">
-
-            <TextView
-                android:id="@+id/tvSubTotal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="@dimen/text_horizontal_margin"
-                android:text="@string/subtotal"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tvSubTotalCalc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
-                android:maxLength="10"
-                android:text="@string/dollar_init"
-                android:textSize="36sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llayoutTotal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/llayoutGstSvc"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:background="@color/gray_80"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/text_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:weightSum="1">
-
-            <TextView
-                android:id="@+id/tvTotal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="@dimen/text_horizontal_margin"
-                android:text="@string/total"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tvTotalCalc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
-                android:maxLength="10"
-                android:text="@string/dollar_init"
-                android:textSize="36sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-    </RelativeLayout>
-
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

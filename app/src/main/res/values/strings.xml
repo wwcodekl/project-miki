@@ -83,7 +83,7 @@
     <string name="amount">Amount</string>
     <string name="remove">Remove</string>
     <string name="add_item">Add Item</string>
-    <string name="calculate_gst_svc">Include service taxes and charges</string>
+    <string name="calculate_gst_svc">Include GST / SVC </string>
 
     <!-- non literal representation -->
     <string name="symbol_currency">$</string>

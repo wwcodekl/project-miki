@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -56,6 +58,7 @@ public class EditFragment extends Fragment {
     private CheckBox mUseSubtotalsCheckBox;
     private ImageView mReceiptImageView;
     private ScrollView mReceiptScrollView;
+    private FloatingActionButton mFabEditDone;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,6 +82,17 @@ public class EditFragment extends Fragment {
         mSvcPercent = (EditText) mLayoutEditTotals.findViewById(R.id.etSvcPercent);
         mSubtotal = (TextView) mLayoutEditTotals.findViewById(R.id.tvSubTotalCalc);
         mTotal = (TextView) mLayoutEditTotals.findViewById(R.id.tvTotalCalc);
+
+        //get bottom sheet behavior from bottom sheet view
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(mLayoutEditTotals);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+        mFabEditDone = (FloatingActionButton) mView.findViewById(R.id.fabEditDone);
+        mFabEditDone.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startBillSplitter();
+            }
+        });
 
         // Set up UseSubtotals checkbox
         mUseSubtotalsCheckBox = (CheckBox) mView.findViewById(R.id.cbUseSubtotals);
