@@ -147,9 +147,6 @@ public class EditFragment extends Fragment {
                 myWebLink.setData(Uri.parse("https://github.com/WomenWhoCode/KL-network/wiki/Project-Miki-Help-File"));
                 startActivity(myWebLink);
                 return true;
-            case R.id.action_done:
-                startBillSplitter();
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
