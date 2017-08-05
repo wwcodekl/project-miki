@@ -54,7 +54,6 @@ public class EditFragment extends Fragment {
     private EditText mSvcPercent;
     private TextView mTotal;
     private CheckBox mUseSubtotalsCheckBox;
-    private ImageButton mAddItemButton;
     private ImageView mReceiptImageView;
     private ScrollView mReceiptScrollView;
 
@@ -91,14 +90,6 @@ public class EditFragment extends Fragment {
             }
         });
 
-        // setup Add Item onClickListener
-        mAddItemButton = (ImageButton) mView.findViewById(R.id.btnAddItem);
-        mAddItemButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                addNewItem();
-            }
-        });
-
         // setup onFocusChangeListener
         setOnFocusChangeListener(mGstPercent);
         setOnFocusChangeListener(mSvcPercent);
@@ -130,6 +121,9 @@ public class EditFragment extends Fragment {
     public boolean onOptionsItemSelected (MenuItem item) {
         // Action bar menu.
         switch (item.getItemId()) {
+            case R.id.action_add:
+                addNewItem();
+                return true;
             case R.id.action_settings:
                 Intent settingsIntent = new Intent(this.getActivity(), SettingsActivity.class);
                 startActivity(settingsIntent);
