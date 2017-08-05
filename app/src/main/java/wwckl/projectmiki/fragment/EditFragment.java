@@ -30,6 +30,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.activity.BillSplitterActivity;
@@ -298,10 +299,11 @@ public class EditFragment extends Fragment {
     }
 
     private void updateTotalsText() {
+        DecimalFormat df = new DecimalFormat("##.00");
         mGstPercent.setText(Integer.toString(mBill.getGstPercent()));
         mSvcPercent.setText(Integer.toString(mBill.getSvcPercent()));
-        mSubtotal.setText(mBill.getSubTotal().toString());
-        mTotal.setText(mBill.getTotal().toString());
+        mSubtotal.setText(df.format(mBill.getSubTotal()));
+        mTotal.setText(df.format(mBill.getTotal()));
     }
 
     // User clicked add new item button

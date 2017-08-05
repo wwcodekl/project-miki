@@ -62,7 +62,7 @@
         android:paddingRight="@dimen/text_horizontal_margin_large">
 
         <TextView
-            android:id="@+id/tvSubTotal"
+            android:id="@+id/tvSubTotalLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingRight="@dimen/text_horizontal_margin"
@@ -76,6 +76,7 @@
             android:fontFamily="sans-serif-condensed"
             android:maxLength="10"
             android:text="@string/dollar_init"
+            android:textColor="@color/black"
             android:textSize="@dimen/text_size_xlarge" />
     </LinearLayout>
 
@@ -94,7 +95,7 @@
         android:weightSum="1">
 
         <TextView
-            android:id="@+id/tvTotal"
+            android:id="@+id/tvTotalLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingRight="@dimen/text_horizontal_margin"
@@ -109,6 +110,7 @@
             android:maxLength="10"
             android:text="@string/dollar_init"
             android:textSize="@dimen/text_size_xlarge"
+            android:textColor="@color/black"
             android:textStyle="bold" />
     </LinearLayout>
 
