@@ -66,11 +66,16 @@
     <string name="new_">New</string>
     <string name="select_all">Select All</string>
     <string name="total">Total</string>
-    <string name="subtotal">Sub total</string>
+    <string name="subtotal">Subtotal</string>
     <string name="gst">GST</string>
     <string name="svc">SVC</string>
+    <string name="gst_percent">GST %</string>
+    <string name="svc_percent">SVC %</string>
     <string name="guest">Guest</string>
-    <string name="amount_init">Amount : $0</string>
+
+    <string name="percent_init">0</string>
+    <string name="dollar_init">$0.00</string>
+    <string name="amount_init">Amount : $0.00</string>
 
     <string name="edit_bill">Edit Bill</string>
     <string name="create_bill">Create Bill</string>
@@ -78,7 +83,7 @@
     <string name="amount">Amount</string>
     <string name="remove">Remove</string>
     <string name="add_item">Add Item</string>
-    <string name="calculate_gst_svc">Calculate GST/SVC to get total</string>
+    <string name="calculate_gst_svc">Include service taxes and charges</string>
 
     <!-- non literal representation -->
     <string name="symbol_currency">$</string>

@@ -15,7 +15,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
@@ -24,6 +23,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
@@ -35,7 +35,6 @@ import wwckl.projectmiki.activity.EditActivity;
 import wwckl.projectmiki.activity.SettingsActivity;
 import wwckl.projectmiki.models.Bill;
 import wwckl.projectmiki.models.Item;
-import wwckl.projectmiki.models.ParseBill;
 import wwckl.projectmiki.models.Receipt;
 
 /**
@@ -46,16 +45,14 @@ public class EditFragment extends Fragment {
 
     private View mView;
     private TableLayout mLayoutEditItems;
-    private TableLayout mLayoutEditTotals;
+    private RelativeLayout mLayoutEditTotals;
     private BillSplitterActivity mBillSplitterActivity;
     private EditActivity mEditActivity;
     private Bill mBill;
-    private EditText mSubtotal;
-    private EditText mGST;
+    private TextView mSubtotal;
     private EditText mGstPercent;
-    private EditText mSVC;
     private EditText mSvcPercent;
-    private EditText mTotal;
+    private TextView mTotal;
     private CheckBox mUseSubtotalsCheckBox;
     private ImageButton mAddItemButton;
     private ImageView mReceiptImageView;
@@ -78,13 +75,11 @@ public class EditFragment extends Fragment {
         mReceiptScrollView = (ScrollView) mView.findViewById(R.id.scrollImage);
         // get edit fields
         mLayoutEditItems = (TableLayout) mView.findViewById(R.id.layoutEditItems);
-        mLayoutEditTotals = (TableLayout) mView.findViewById(R.id.layoutEditTotals);
-        mSubtotal = (EditText) mLayoutEditTotals.findViewById(R.id.etSubTotal);
-        mGST = (EditText) mLayoutEditTotals.findViewById(R.id.etGST);
+        mLayoutEditTotals = (RelativeLayout) mView.findViewById(R.id.layoutEditTotals);
         mGstPercent = (EditText) mLayoutEditTotals.findViewById(R.id.etGstPercent);
-        mSVC = (EditText) mLayoutEditTotals.findViewById(R.id.etSVC);
         mSvcPercent = (EditText) mLayoutEditTotals.findViewById(R.id.etSvcPercent);
-        mTotal = (EditText) mLayoutEditTotals.findViewById(R.id.etTotal);
+        mSubtotal = (TextView) mLayoutEditTotals.findViewById(R.id.tvSubTotalCalc);
+        mTotal = (TextView) mLayoutEditTotals.findViewById(R.id.tvTotalCalc);
 
         // Set up UseSubtotals checkbox
         mUseSubtotalsCheckBox = (CheckBox) mView.findViewById(R.id.cbUseSubtotals);
@@ -92,7 +87,7 @@ public class EditFragment extends Fragment {
         mUseSubtotalsCheckBox.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mBill.setUseSubtotals(mUseSubtotalsCheckBox.isChecked());
-                updateTotals();
+                updateTotalsText();
             }
         });
 
@@ -105,15 +100,11 @@ public class EditFragment extends Fragment {
         });
 
         // setup onFocusChangeListener
-        setOnFocusChangeListener(mSubtotal);
-        setOnFocusChangeListener(mGST);
         setOnFocusChangeListener(mGstPercent);
-        setOnFocusChangeListener(mSVC);
         setOnFocusChangeListener(mSvcPercent);
-        setOnFocusChangeListener(mTotal);
 
         createItems();
-        updateTotals();
+        updateTotalsText();
 
         // add Image if present
         if (Receipt.getReceiptBitmap() != null) {
@@ -149,19 +140,7 @@ public class EditFragment extends Fragment {
                 startActivity(myWebLink);
                 return true;
             case R.id.action_done:
-                hideKeyboard();
-                if (mBillSplitterActivity != null) {
-                    mBillSplitterActivity.setActivityBill(mBill);
-                    mBillSplitterActivity.fragmentSuicide();
-                }
-                else if (mEditActivity != null) {
-                    mEditActivity.startBillSplitting();
-                }
-                else {
-                    // Start bill splitter activity
-                    Intent intent = new Intent(this.getActivity(), BillSplitterActivity.class);
-                    startActivity(intent);
-                }
+                startBillSplitter();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -224,33 +203,13 @@ public class EditFragment extends Fragment {
         }
 
         switch (viewId) {
-            case R.id.etSubTotal:
-                if (!mBill.updateSubTotal(new BigDecimal(text)))
-                    return;
-                // Check for added item
-                updateItems();
-                break;
-            case R.id.etGST:
-                if (!mBill.updateGST(new BigDecimal(text)))
-                    return;
-                break;
             case R.id.etGstPercent:
                 if (!mBill.updateGstPercent(Integer.parseInt(text)))
-                    return;
-                break;
-            case R.id.etSVC:
-                if (!mBill.updateSVC(new BigDecimal(text)))
                     return;
                 break;
             case R.id.etSvcPercent:
                 if (!mBill.updateSvcPercent(Integer.parseInt(text)))
                     return;
-                break;
-            case R.id.etTotal:
-                if (!mBill.updateTotal(new BigDecimal(text)))
-                    return;
-                // Check for added item
-                updateItems();
                 break;
             default:
                 // check for editItems
@@ -270,7 +229,7 @@ public class EditFragment extends Fragment {
                 break;
         }
         // update Totals UI
-        updateTotals();
+        updateTotalsText();
     }
 
     // OnCreate
@@ -333,12 +292,10 @@ public class EditFragment extends Fragment {
         addItemRow(item, numOfItems - 1);
     }
 
-    private void updateTotals() {
-        mSubtotal.setText(mBill.getSubTotal().toString());
-        mGST.setText(mBill.getGst().toString());
+    private void updateTotalsText() {
         mGstPercent.setText(Integer.toString(mBill.getGstPercent()));
-        mSVC.setText(mBill.getSvc().toString());
         mSvcPercent.setText(Integer.toString(mBill.getSvcPercent()));
+        mSubtotal.setText(mBill.getSubTotal().toString());
         mTotal.setText(mBill.getTotal().toString());
     }
 
@@ -380,7 +337,7 @@ public class EditFragment extends Fragment {
             row.getChildAt(2).setId(i-1);
         }
 
-        updateTotals();
+        updateTotalsText();
     }
 
     // Hide keyboard if present
@@ -389,6 +346,22 @@ public class EditFragment extends Fragment {
         if(view != null) {
             InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    private void startBillSplitter() {
+        hideKeyboard();
+        if (mBillSplitterActivity != null) {
+            mBillSplitterActivity.setActivityBill(mBill);
+            mBillSplitterActivity.fragmentSuicide();
+        }
+        else if (mEditActivity != null) {
+            mEditActivity.startBillSplitting();
+        }
+        else {
+            // Start bill splitter activity
+            Intent intent = new Intent(this.getActivity(), BillSplitterActivity.class);
+            startActivity(intent);
         }
     }
 }

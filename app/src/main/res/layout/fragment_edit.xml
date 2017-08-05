@@ -28,7 +28,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:id="@+id/scrollItemized"
-        android:layout_weight="20"
+        android:layout_weight="49.50"
         android:fadeScrollbars="false">
             <TableLayout
                 android:layout_width="match_parent"
@@ -66,121 +66,144 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_height="wrap_content">
 
         <CheckBox
+            android:id="@+id/cbUseSubtotals"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:text="@string/calculate_gst_svc"
-            android:id="@+id/cbUseSubtotals" />
+            android:text="@string/calculate_gst_svc" />
+
         <ImageButton
+            android:id="@+id/btnAddItem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:id="@+id/btnAddItem"
-            android:src="@drawable/ic_add_black_18dp"
-            android:contentDescription="@string/add_item" />
+            android:layout_alignParentRight="true"
+            android:contentDescription="@string/add_item"
+            android:src="@drawable/ic_add_black_18dp" />
 
     </RelativeLayout>
 
-    <TableLayout
+    <RelativeLayout
+        android:id="@+id/layoutEditTotals"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:stretchColumns="3,5"
-        android:id="@+id/layoutEditTotals"
-        android:focusable="false"
-        android:background="@color/white">
+        android:background="@color/gray_80">
 
-        <TableRow
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/llayoutGstSvc"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/trSubtotal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/svc"
-                android:id="@+id/tvSVC" />
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:id="@+id/etSvcPercent"
-                android:selectAllOnFocus="true" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/symbol_percent"
-                android:id="@+id/tvSvcPercentage" />
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:id="@+id/etSVC"
-                android:selectAllOnFocus="true" />
+            android:background="@color/gray_77"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/text_vertical_margin"
+            android:paddingLeft="@dimen/text_horizontal_margin"
+            android:paddingRight="@dimen/text_horizontal_margin"
+            android:paddingTop="@dimen/text_vertical_margin">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tvGST"
+                android:layout_width="48dp"
                 android:layout_height="wrap_content"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:text="@string/gst_percent"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/subtotal"
-                android:id="@+id/tvSubTotal" />
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:id="@+id/etSubTotal"
-                android:selectAllOnFocus="true" />
-        </TableRow>
+                android:textSize="12sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/trTotal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/gst"
-                android:id="@+id/tvGST" />
             <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="number"
                 android:id="@+id/etGstPercent"
-                android:selectAllOnFocus="true" />
-            <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="48dp"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/symbol_percent"
-                android:id="@+id/tvGstPercentage" />
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:id="@+id/etGST"
-                android:selectAllOnFocus="true" />
+                android:inputType="number"
+                android:selectAllOnFocus="true"
+                android:text="@string/percent_init" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tvSVC"
+                android:layout_width="48dp"
                 android:layout_height="wrap_content"
+                android:text="@string/svc_percent"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="@string/total"
-                android:id="@+id/tvTotal" />
+                android:textSize="12sp" />
+
             <EditText
+                android:id="@+id/etSvcPercent"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:selectAllOnFocus="true"
+                android:text="@string/percent_init" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llayoutSubtotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/llayoutTotal"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:background="@color/gray_80"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/text_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
+
+            <TextView
+                android:id="@+id/tvSubTotal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:id="@+id/etTotal"
-                android:selectAllOnFocus="true" />
-        </TableRow>
-    </TableLayout>
+                android:paddingRight="@dimen/text_horizontal_margin"
+                android:text="@string/subtotal"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvSubTotalCalc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:maxLength="10"
+                android:text="@string/dollar_init"
+                android:textSize="36sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llayoutTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/llayoutGstSvc"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:background="@color/gray_80"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/text_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:weightSum="1">
+
+            <TextView
+                android:id="@+id/tvTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="@dimen/text_horizontal_margin"
+                android:text="@string/total"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvTotalCalc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:maxLength="10"
+                android:text="@string/dollar_init"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </LinearLayout>

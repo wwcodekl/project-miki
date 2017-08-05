@@ -413,6 +413,7 @@ public class Bill implements Parcelable {
         }
         else {
             mTotal = sumOfItems();
+            mSubTotal = mTotal;
         }
     }
 
