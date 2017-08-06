@@ -9,7 +9,7 @@
         <item name="android:actionModeBackground">@color/primary_dark</item>
         <item name="android:actionModeStyle">@style/CustomActionMode</item>
         <item name="android:actionModeCloseButtonStyle">@style/action_button_done</item>
-        <item name="android:actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
+        <item name="android:actionModeCloseDrawable">@drawable/abc_ic_ab_back_material</item>
         <item name="actionBarStyle">@style/TitledActionBarStyle</item>
         <!-- Main theme colors -->
         <!--   your app branding color for the app bar -->
@@ -17,14 +17,14 @@
         <!--   darker variant for the status bar and contextual app bars -->
         <item name="colorPrimaryDark">@color/primary_darker</item>
         <!--   theme UI controls like checkboxes and text fields -->
-        <item name="colorAccent">@color/primary_light</item>
+        <item name="colorAccent">@color/secondary_light</item>
         <!-- Support library compatibility -->
         <item name="actionBarDivider">@null</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeBackground">@color/primary_dark</item>
         <item name="actionModeStyle">@style/CustomActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/action_button_done</item>
-        <item name="actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
+        <item name="actionModeCloseDrawable">@drawable/abc_ic_ab_back_material</item>
     </style>
 
     <style name="CustomActionMode" parent="Widget.AppCompat.ActionBar">
@@ -36,8 +36,8 @@
     </style>
 
     <style name="action_button_done" parent="Widget.AppCompat.ActionButton">
-        <item name="android:actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
-        <item name="actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
+        <item name="android:actionModeCloseDrawable">@drawable/abc_ic_ab_back_material</item>
+        <item name="actionModeCloseDrawable">@drawable/abc_ic_ab_back_material</item>
         <item name="colorControlNormal">@color/primary_light</item>
     </style>
 
@@ -51,7 +51,7 @@
         <!--   darker variant for the status bar and contextual app bars -->
         <item name="colorPrimaryDark">@color/primary_darker</item>
         <!--   theme UI controls like checkboxes and text fields -->
-        <item name="colorAccent">@color/primary_light</item>
+        <item name="colorAccent">@color/secondary_light</item>
         <!-- Support library compatibility -->
         <item name="actionBarStyle">@style/NoTitleActionBarStyle</item>
         <item name="actionMenuTextAppearance">@style/NoTitleActionBarMenuStyle</item>
