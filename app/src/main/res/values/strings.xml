@@ -136,6 +136,8 @@
     <string name="title_activity_edit">Please double check</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="show_bill_image">Show Bill</string>
+    <string name="no_bill_image">No associated photo of bill</string>
 
     <string-array name="alphabets">
         <item>A</item>

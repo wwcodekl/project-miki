@@ -1,11 +1,12 @@
 package wwckl.projectmiki.fragment;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
@@ -19,11 +20,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -39,6 +42,7 @@ import wwckl.projectmiki.activity.SettingsActivity;
 import wwckl.projectmiki.adapter.EditItemAdapter;
 import wwckl.projectmiki.models.Bill;
 import wwckl.projectmiki.models.Item;
+import wwckl.projectmiki.models.Receipt;
 
 /**
  * Created by Aryn on 7/12/15.
@@ -111,6 +115,12 @@ public class EditFragment extends Fragment {
         menu.clear();
         // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.menu_edit, menu);
+
+        // Hide image button if no attached image
+        MenuItem item = menu.findItem(R.id.action_show_image);
+        if (Receipt.getReceiptBitmap() == null) {
+            item.setVisible(false);
+        }
     }
 
     @Override
@@ -120,6 +130,9 @@ public class EditFragment extends Fragment {
             case R.id.action_add:
                 //addNewItem();
                 displayEditDialog(-1);
+                return true;
+            case R.id.action_show_image:
+                displayImage();
                 return true;
             case R.id.action_settings:
                 Intent settingsIntent = new Intent(this.getActivity(), SettingsActivity.class);
@@ -310,5 +323,27 @@ public class EditFragment extends Fragment {
             Intent intent = new Intent(this.getActivity(), BillSplitterActivity.class);
             startActivity(intent);
         }
+    }
+
+    private void displayImage() {
+        if (Receipt.getReceiptBitmap() == null) return;
+
+        Dialog builder = new Dialog(this.getActivity());
+        builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        builder.getWindow().setBackgroundDrawable(
+                new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                //nothing;
+            }
+        });
+
+        ImageView imageView = new ImageView(this.getActivity());
+        imageView.setImageBitmap(Receipt.getReceiptBitmap());
+        builder.addContentView(imageView, new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        builder.show();
     }
 }

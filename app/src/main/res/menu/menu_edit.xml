@@ -8,6 +8,11 @@
         android:icon="@drawable/ic_add_white_24dp"
         android:title="@string/add_item"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_show_image"
+        android:icon="@drawable/ic_image_white_24dp"
+        android:title="@string/show_bill_image"
+        app:showAsAction="always" />
     <item android:id="@+id/action_settings"
         android:title="@string/settings"
         android:orderInCategory="99"
