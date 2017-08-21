@@ -274,10 +274,6 @@ public class EditFragment extends Fragment {
             mBill.updateItem(new BigDecimal(amount), itemIndex);
         } else {
             mBill.addItem(description, amount);
-            // TODO: DEBUGGING PURPOSES
-            for (int i=1; i < 27; i++) {
-                mBill.addItem(String.valueOf((char)(i + 64)), (i + 1) + "");
-            }
         }
         mItemAdapter.notifyDataSetChanged();
         updateTotalsText();
