@@ -421,6 +421,12 @@ public class Bill implements Parcelable {
         mListOfAllItems.add(new Item("Item", new BigDecimal(0.00)));
     }
 
+    public void addItem(String description, String amount) {
+        Item newItem = new Item(description, new BigDecimal(amount));
+        mListOfAllItems.add(newItem);
+        updateTotals();
+    }
+
     // Return false if no changes to totals
     public Boolean updateSubTotal(BigDecimal amount) {
         if(amount.compareTo(mSubTotal) == 0)

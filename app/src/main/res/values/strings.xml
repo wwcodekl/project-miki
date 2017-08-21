@@ -74,8 +74,9 @@
     <string name="guest">Guest</string>
 
     <string name="percent_init">0</string>
-    <string name="dollar_init">$0.00</string>
+    <string name="dollar_init">0.00</string>
     <string name="amount_init">Amount : $0.00</string>
+    <string name="item_init">Item</string>
 
     <string name="edit_bill">Edit Bill</string>
     <string name="create_bill">Create Bill</string>

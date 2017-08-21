@@ -3,12 +3,14 @@ package wwckl.projectmiki.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
-import android.text.InputType;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -19,26 +21,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ScrollView;
-import android.widget.TableLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import wwckl.projectmiki.R;
 import wwckl.projectmiki.activity.BillSplitterActivity;
 import wwckl.projectmiki.activity.EditActivity;
 import wwckl.projectmiki.activity.SettingsActivity;
+import wwckl.projectmiki.adapter.EditItemAdapter;
 import wwckl.projectmiki.models.Bill;
 import wwckl.projectmiki.models.Item;
-import wwckl.projectmiki.models.Receipt;
 
 /**
  * Created by Aryn on 7/12/15.
@@ -47,8 +47,6 @@ public class EditFragment extends Fragment {
     final String PARCEL_BILL = "PARCEL_BILL";
 
     private View mView;
-    private TableLayout mLayoutEditItems;
-    private RelativeLayout mLayoutEditTotals;
     private BillSplitterActivity mBillSplitterActivity;
     private EditActivity mEditActivity;
     private Bill mBill;
@@ -57,9 +55,7 @@ public class EditFragment extends Fragment {
     private EditText mSvcPercent;
     private TextView mTotal;
     private CheckBox mUseSubtotalsCheckBox;
-    private ImageView mReceiptImageView;
-    private ScrollView mReceiptScrollView;
-    private FloatingActionButton mFabEditDone;
+    private EditItemAdapter mItemAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -73,23 +69,18 @@ public class EditFragment extends Fragment {
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_edit, container, false);
 
-        // get views
-        mReceiptImageView = (ImageView) mView.findViewById(R.id.imgvReceipt);
-        mReceiptScrollView = (ScrollView) mView.findViewById(R.id.scrollImage);
-        // get edit fields
-        mLayoutEditItems = (TableLayout) mView.findViewById(R.id.layoutEditItems);
-        mLayoutEditTotals = (RelativeLayout) mView.findViewById(R.id.layoutEditTotals);
-        mGstPercent = (EditText) mLayoutEditTotals.findViewById(R.id.etGstPercent);
-        mSvcPercent = (EditText) mLayoutEditTotals.findViewById(R.id.etSvcPercent);
-        mSubtotal = (TextView) mLayoutEditTotals.findViewById(R.id.tvSubTotalCalc);
-        mTotal = (TextView) mLayoutEditTotals.findViewById(R.id.tvTotalCalc);
+        RelativeLayout layoutEditTotals = (RelativeLayout) mView.findViewById(R.id.layoutEditTotals);
+        mGstPercent = (EditText) layoutEditTotals.findViewById(R.id.etGstPercent);
+        mSvcPercent = (EditText) layoutEditTotals.findViewById(R.id.etSvcPercent);
+        mSubtotal = (TextView) layoutEditTotals.findViewById(R.id.tvSubTotalCalc);
+        mTotal = (TextView) layoutEditTotals.findViewById(R.id.tvTotalCalc);
 
         //get bottom sheet behavior from bottom sheet view
-        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(mLayoutEditTotals);
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(layoutEditTotals);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 
-        mFabEditDone = (FloatingActionButton) mView.findViewById(R.id.fabEditDone);
-        mFabEditDone.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fabEditDone = (FloatingActionButton) mView.findViewById(R.id.fabEditDone);
+        fabEditDone.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startBillSplitter();
             }
@@ -109,19 +100,9 @@ public class EditFragment extends Fragment {
         setOnFocusChangeListener(mGstPercent);
         setOnFocusChangeListener(mSvcPercent);
 
-        createItems();
+        setupListView();
         updateTotalsText();
 
-        // add Image if present
-        if (Receipt.getReceiptBitmap() != null) {
-            mReceiptImageView.setImageBitmap(Receipt.getReceiptBitmap());
-            mReceiptScrollView.setVisibility(View.VISIBLE);
-            Log.d("Receipt bitmap", "not null");
-        }
-        else {
-            mReceiptScrollView.setVisibility(View.GONE);
-            Log.d("Receipt bitmap", "null");
-        }
         return mView;
     }
 
@@ -137,7 +118,8 @@ public class EditFragment extends Fragment {
         // Action bar menu.
         switch (item.getItemId()) {
             case R.id.action_add:
-                addNewItem();
+                //addNewItem();
+                displayEditDialog(-1);
                 return true;
             case R.id.action_settings:
                 Intent settingsIntent = new Intent(this.getActivity(), SettingsActivity.class);
@@ -181,6 +163,61 @@ public class EditFragment extends Fragment {
         hideKeyboard();
     }
 
+    private void setupListView() {
+        ArrayList<Item> arrayOfItems = (ArrayList<Item>) mBill.getListOfAllItems();
+        mItemAdapter = new EditItemAdapter(this.getActivity(), arrayOfItems);
+        ListView lvEditItems = (ListView) mView.findViewById(R.id.listEditItems);
+        lvEditItems.setAdapter(mItemAdapter);
+
+        lvEditItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View
+                    view, int position, long id) {
+                    displayEditDialog(position);
+                }
+        });
+    }
+
+    private void displayEditDialog(final int index) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this.getActivity());
+        final View dialogView = this.getActivity().getLayoutInflater().inflate(
+                R.layout.dialog_edit_item, null);
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.setTitle(R.string.add_item);
+
+        final EditText etItemDesc = (EditText) dialogView.findViewById(R.id.etDialogItemDesc);
+        final EditText etItemAmt = (EditText) dialogView.findViewById(R.id.etDialogItemAmt);
+
+        if (index >= 0) {
+            dialogBuilder.setTitle("Edit Item");
+            Item selectedItem  = mBill.getListOfAllItems().get(index);
+            DecimalFormat df = new DecimalFormat("0.00");
+            etItemDesc.setText(selectedItem.getDescription());
+            etItemAmt.setText(df.format(selectedItem.getPrice()));
+        }
+
+        dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                upsertItem(index, etItemDesc.getText().toString(), etItemAmt.getText().toString());
+            }
+        });
+
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //pass
+            }
+        });
+
+        if (index >= 0) {
+            dialogBuilder.setNeutralButton("Delete", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    deleteItem(index);
+                }
+            });
+        }
+        AlertDialog b = dialogBuilder.create();
+        b.show();
+    }
+
     private void setOnFocusChangeListener(EditText editText){
 
         editText.setOnFocusChangeListener(new EditText.OnFocusChangeListener() {
@@ -212,138 +249,44 @@ public class EditFragment extends Fragment {
             case R.id.etGstPercent:
                 if (!mBill.updateGstPercent(Integer.parseInt(text)))
                     return;
-                break;
             case R.id.etSvcPercent:
                 if (!mBill.updateSvcPercent(Integer.parseInt(text)))
                     return;
-                break;
             default:
-                // check for editItems
-                int index = viewId;
-                Log.d("index edit", Integer.toString(index));
-
-                EditText editText;
-                TableRow row = (TableRow) mLayoutEditItems.getChildAt(index + 1);
-                editText = (EditText) row.getChildAt(0);
-                Log.d("editText 0", editText.getText().toString());
-                mBill.updateItem(editText.getText().toString(), index);
-
-                editText = (EditText) row.getChildAt(1);
-                Log.d("editText 1", editText.getText().toString());
-                if (!mBill.updateItem(new BigDecimal(editText.getText().toString()), index))
-                    return;
                 break;
         }
         // update Totals UI
         updateTotalsText();
     }
 
-    // OnCreate
-    private void createItems() {
-        Item item;
-        for (int i = 0; i < mBill.getListOfAllItems().size(); i++) {
-            item = mBill.getListOfAllItems().get(i);
-            addItemRow(item, i);
-        }
-    }
-
-    private void addItemRow(Item item, int index) {
-        EditText editTextDesc;
-        EditText editTextAmt;
-        ImageButton imageButtonDelete;
-
-        TableRow row = new TableRow(this.getActivity());
-        TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
-        row.setLayoutParams(lp);
-
-        editTextDesc = new EditText(this.getActivity());
-        editTextDesc.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-        editTextDesc.setText(item.getDescription());
-        editTextDesc.setId(index);
-        editTextDesc.setSelectAllOnFocus(true);
-        setOnFocusChangeListener(editTextDesc);
-        row.addView(editTextDesc);
-
-        editTextAmt = new EditText(this.getActivity());
-        editTextAmt.setText(item.getPrice().toString());
-        editTextAmt.setInputType(InputType.TYPE_CLASS_NUMBER |
-                InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        editTextAmt.setId(index);
-        editTextAmt.setSelectAllOnFocus(true);
-        setOnFocusChangeListener(editTextAmt);
-        row.addView(editTextAmt);
-
-        imageButtonDelete = new ImageButton(this.getActivity());
-        imageButtonDelete.setImageResource(R.drawable.ic_delete_black_18dp);
-        imageButtonDelete.setClickable(true);
-        imageButtonDelete.setId(index);
-        imageButtonDelete.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                deleteItem(v.getId());
-            }
-        });
-        row.addView(imageButtonDelete);
-
-        mLayoutEditItems.addView(row, index+1);
-    }
-
-    // check if there are any new items
-    private void updateItems() {
-        int numOfItems = mBill.getListOfAllItems().size();
-        if (mLayoutEditItems.getChildCount() == (numOfItems + 1))
-            return;
-        Log.d("updateItems", Integer.toString(numOfItems));
-
-        Item item = mBill.getListOfAllItems().get(numOfItems-1);
-        addItemRow(item, numOfItems - 1);
-    }
-
     private void updateTotalsText() {
-        DecimalFormat df = new DecimalFormat("##.00");
+        DecimalFormat df = new DecimalFormat("0.00");
         mGstPercent.setText(Integer.toString(mBill.getGstPercent()));
         mSvcPercent.setText(Integer.toString(mBill.getSvcPercent()));
         mSubtotal.setText(df.format(mBill.getSubTotal()));
         mTotal.setText(df.format(mBill.getTotal()));
     }
 
-    // User clicked add new item button
-    public void addNewItem() {
-        mBill.addItem();
-        // populate new item in mEditItemLayout
-        int index = mBill.getListOfAllItems().size()-1;
-        Item item = mBill.getListOfAllItems().get(index);
-        addItemRow(item, index);
-
-        // Set focus to new row
-        TableRow row = (TableRow) mLayoutEditItems.getChildAt(index + 1);
-        if (row != null) {
-            EditText editText = (EditText) row.getChildAt(0);
-            if (editText != null)
-                editText.requestFocus();
+    public void upsertItem(int itemIndex, String description, String amount) {
+        if (amount.isEmpty()) return;
+        if (itemIndex >= 0) {
+            mBill.updateItem(description, itemIndex);
+            mBill.updateItem(new BigDecimal(amount), itemIndex);
+        } else {
+            mBill.addItem(description, amount);
+            // TODO: DEBUGGING PURPOSES
+            for (int i=1; i < 27; i++) {
+                mBill.addItem(String.valueOf((char)(i + 64)), (i + 1) + "");
+            }
         }
+        mItemAdapter.notifyDataSetChanged();
+        updateTotalsText();
     }
 
     public void deleteItem(int itemIndex) {
         Log.d("deleteItem", Integer.toString(itemIndex));
-
-        try {
-            mLayoutEditItems.removeViewAt(itemIndex + 1);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-
-        // delete item at location itemIndex
-        // needs to be done only after we have finished with the view
         mBill.deleteItem(itemIndex);
-
-        // and update the rest
-        for (int i = (itemIndex+1); i < (mLayoutEditItems.getChildCount()); i++) {
-            TableRow row = (TableRow) mLayoutEditItems.getChildAt(i);
-            row.getChildAt(0).setId(i-1);
-            row.getChildAt(1).setId(i-1);
-            row.getChildAt(2).setId(i-1);
-        }
-
+        mItemAdapter.notifyDataSetChanged();
         updateTotalsText();
     }
 
@@ -351,7 +294,8 @@ public class EditFragment extends Fragment {
     private void hideKeyboard() {
         View view = getActivity().getCurrentFocus();
         if(view != null) {
-            InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager inputMethodManager =
+                    (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
