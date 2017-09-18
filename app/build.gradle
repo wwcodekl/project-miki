@@ -29,7 +29,7 @@ dependencies {
     compile "com.android.support:appcompat-v7:${support_library_version}"
     compile "com.android.support:support-v4:${support_library_version}"
     compile "com.android.support:design:${support_library_version}"
-    compile project(':libraries:tess-two')
+    //compile project(':libraries:tess-two')
     compile 'com.jakewharton:butterknife:8.5.1'
     compile 'com.rmtheis:tess-two:7.0.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
