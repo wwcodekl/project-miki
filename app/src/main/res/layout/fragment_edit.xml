@@ -46,7 +46,7 @@
         android:clickable="true"
         app:backgroundTint="@color/background"
         app:fabSize="normal"
-        app:srcCompat="@drawable/ic_account_balance_wallet_white_24dp"
+        app:srcCompat="@drawable/ic_arrow_forward_white_24dp"
         app:layout_anchor="@id/layoutEditTotals"
         app:layout_anchorGravity="top|right|end" />
 

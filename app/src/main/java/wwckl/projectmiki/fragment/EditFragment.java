@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -111,7 +112,7 @@ public class EditFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu (Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
         // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.menu_edit, menu);
@@ -124,7 +125,7 @@ public class EditFragment extends Fragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected (MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         // Action bar menu.
         switch (item.getItemId()) {
             case R.id.action_add:
@@ -157,12 +158,10 @@ public class EditFragment extends Fragment {
             mBill = mBillSplitterActivity.getActivityBill();
 
             mBillSplitterActivity.displayToast(getString(R.string.click_done_when_complete), true);
-        }
-        else if(activity instanceof EditActivity) {
+        } else if (activity instanceof EditActivity) {
             mEditActivity = (EditActivity) activity;
             mBill = mEditActivity.getActivityBill();
-        }
-        else {
+        } else {
             mBill = new Bill();
         }
         // do not show keyboard on start of Edit. Allow user to check first.
@@ -185,8 +184,8 @@ public class EditFragment extends Fragment {
         lvEditItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View
                     view, int position, long id) {
-                    displayEditDialog(position);
-                }
+                displayEditDialog(position);
+            }
         });
     }
 
@@ -196,21 +195,25 @@ public class EditFragment extends Fragment {
                 R.layout.dialog_edit_item, null);
         dialogBuilder.setView(dialogView);
         dialogBuilder.setTitle(R.string.add_item);
+        String doneText = "Next";
 
         final EditText etItemDesc = (EditText) dialogView.findViewById(R.id.etDialogItemDesc);
         final EditText etItemAmt = (EditText) dialogView.findViewById(R.id.etDialogItemAmt);
 
         if (index >= 0) {
             dialogBuilder.setTitle("Edit Item");
-            Item selectedItem  = mBill.getListOfAllItems().get(index);
+            Item selectedItem = mBill.getListOfAllItems().get(index);
             DecimalFormat df = new DecimalFormat("0.00");
             etItemDesc.setText(selectedItem.getDescription());
             etItemAmt.setText(df.format(selectedItem.getPrice()));
         }
 
-        dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+        dialogBuilder.setPositiveButton(doneText, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 upsertItem(index, etItemDesc.getText().toString(), etItemAmt.getText().toString());
+                if (index < 0) {
+                    displayEditDialog(-1);
+                }
             }
         });
 
@@ -228,10 +231,12 @@ public class EditFragment extends Fragment {
             });
         }
         AlertDialog b = dialogBuilder.create();
+        showKeyboard(etItemDesc, b);
+
         b.show();
     }
 
-    private void setOnFocusChangeListener(EditText editText){
+    private void setOnFocusChangeListener(EditText editText) {
 
         editText.setOnFocusChangeListener(new EditText.OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
@@ -251,10 +256,9 @@ public class EditFragment extends Fragment {
         });
     }
 
-    public void setValueOfEditText(String text, int viewId)
-    {
+    public void setValueOfEditText(String text, int viewId) {
         Log.d("onFocusChange", viewId + ":" + text);
-        if(text.isEmpty()) {
+        if (text.isEmpty()) {
             text = "0";
         }
 
@@ -302,11 +306,22 @@ public class EditFragment extends Fragment {
     // Hide keyboard if present
     private void hideKeyboard() {
         View view = getActivity().getCurrentFocus();
-        if(view != null) {
+        if (view != null) {
             InputMethodManager inputMethodManager =
                     (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    private void showKeyboard(EditText editText, final Dialog dialog) {
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange (View v,boolean hasFocus){
+                if (hasFocus) {
+                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                }
+            }
+        });
     }
 
     private void startBillSplitter() {
