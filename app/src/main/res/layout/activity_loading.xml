@@ -36,7 +36,7 @@
         android:clickable="true"
         android:onClick="startEditActiviy"
         android:visibility="gone"
-        android:background="@drawable/button"
+        android:background="@color/background"
         android:textColor="@color/primary_text_default_material_dark"
         android:textAppearance="?android:attr/textAppearanceMedium"
         />

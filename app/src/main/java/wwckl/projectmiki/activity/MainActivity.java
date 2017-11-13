@@ -86,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         mLtGray = getResources().getColor(R.color.light_gray);
         mDkGray = getResources().getColor(R.color.dark_gray);
-        mLightishGray = getResources().getColor(R.color.lightish_gray);
-        mDarkishGray = getResources().getColor(R.color.darkish_gray);
+        mLightishGray = getResources().getColor(R.color.gray_90);
+        mDarkishGray = getResources().getColor(R.color.gray_25);
         mContrastBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {

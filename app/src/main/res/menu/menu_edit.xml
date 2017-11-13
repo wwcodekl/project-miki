@@ -3,9 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="wwckl.projectmiki.fragment.EditFragment">
-    <item android:id="@+id/action_done"
-        android:title="@string/done"
-        app:showAsAction="always|withText"/>
+    <item
+        android:id="@+id/action_add"
+        android:icon="@drawable/ic_add_white_24dp"
+        android:title="@string/add_item"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_show_image"
+        android:icon="@drawable/ic_image_white_24dp"
+        android:title="@string/show_bill_image"
+        app:showAsAction="always" />
     <item android:id="@+id/action_settings"
         android:title="@string/settings"
         android:orderInCategory="99"
