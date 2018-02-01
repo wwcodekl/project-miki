@@ -157,7 +157,7 @@ public class EditFragment extends Fragment {
             mBillSplitterActivity = (BillSplitterActivity) activity;
             mBill = mBillSplitterActivity.getActivityBill();
 
-            mBillSplitterActivity.displayToast(getString(R.string.click_done_when_complete), true);
+            mBillSplitterActivity.displayToast(getString(R.string.review_bill_items), true);
         } else if (activity instanceof EditActivity) {
             mEditActivity = (EditActivity) activity;
             mBill = mEditActivity.getActivityBill();

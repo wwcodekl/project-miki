@@ -95,7 +95,7 @@
     <string name="crop_error_message">Whoops - your device doesn\'t support the crop action!</string>
     <string name="bill_not_balanced">Bill not balanced!\nPlease check totals</string>
     <string name="click_menu_to_edit_bill">Click menu to edit Bill</string>
-    <string name="click_done_when_complete">Click DONE when complete</string>
+    <string name="review_bill_items">Review bill items</string>
     <string name="unknown_type">UNKNOWN TYPE</string>
 
     <!--- instructions -->
