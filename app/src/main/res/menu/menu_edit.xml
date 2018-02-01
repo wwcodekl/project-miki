@@ -10,7 +10,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/action_show_image"
-        android:icon="@drawable/ic_image_white_24dp"
+        android:icon="@drawable/ic_receipt_white_24dp"
         android:title="@string/show_bill_image"
         app:showAsAction="always" />
     <item android:id="@+id/action_settings"
