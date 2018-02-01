@@ -34,8 +34,6 @@ import wwckl.projectmiki.fragment.SummaryFragment;
 import wwckl.projectmiki.models.Bill;
 import wwckl.projectmiki.models.BillSplit;
 import wwckl.projectmiki.models.Item;
-import wwckl.projectmiki.models.ParseBill;
-import wwckl.projectmiki.models.Receipt;
 
 /**
  * Created by Aryn on 5/17/15.
@@ -92,8 +90,8 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         mItemizedLayout = (LinearLayout)findViewById(R.id.layoutItemized);
         mSvcTextView = (TextView)findViewById(R.id.tvSVC);
         mGstTextView = (TextView)findViewById(R.id.tvGST);
-        mSubTotalTextView = (TextView)findViewById(R.id.tvSubTotal);
-        mTotalTextView = (TextView)findViewById(R.id.tvTotal);
+        mSubTotalTextView = (TextView)findViewById(R.id.tvSubTotalLabel);
+        mTotalTextView = (TextView)findViewById(R.id.tvTotalLabel);
         mSplitTypeTextView = (TextView)findViewById(R.id.tvSplitType);
         mSummaryTextView = (TextView)findViewById(R.id.tvSummary);
         mSummaryScrollView = (ScrollView)findViewById(R.id.scrollSummary);

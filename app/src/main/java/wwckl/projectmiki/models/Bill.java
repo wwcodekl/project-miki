@@ -413,11 +413,18 @@ public class Bill implements Parcelable {
         }
         else {
             mTotal = sumOfItems();
+            mSubTotal = mTotal;
         }
     }
 
     public void addItem() {
         mListOfAllItems.add(new Item("Item", new BigDecimal(0.00)));
+    }
+
+    public void addItem(String description, String amount) {
+        Item newItem = new Item(description, new BigDecimal(amount));
+        mListOfAllItems.add(newItem);
+        updateTotals();
     }
 
     // Return false if no changes to totals

@@ -116,9 +116,11 @@ public class ParseBill extends Bill {
         // common ocr errors:
         receiptText = receiptText.replaceAll("Tota1", "Total");
         receiptText = receiptText.replaceAll("T0ta1", "Total");
+        receiptText = receiptText.replaceAll("fofal", "total");
         receiptText = receiptText.replaceAll("tota1", "total");
         receiptText = receiptText.replaceAll("10ta1", "total");
         receiptText = receiptText.replaceAll("Totai", "Total");
+        receiptText = receiptText.replaceAll("Tofal", "Total");
         receiptText = receiptText.replaceAll("totai", "total");
         receiptText = receiptText.replaceAll("TDTAL", "TOTAL");
         receiptText = receiptText.replaceAll("T0TAL", "TOTAL");
@@ -455,44 +457,39 @@ public class ParseBill extends Bill {
             // Sub Total
             BigDecimal sumOfTotals = sumOfTotals();
             BigDecimal amount;
-            comparison = sumOfTotals.compareTo(mTotal);
-            // SubTotal + SVC + GST < Total assume missing a field
-            if (comparison < 0) {
-                comparison = mSubTotal.compareTo(mTotal);
-                switch (comparison) {
-                    case 1: // SubTotal is bigger, assume error in sub total.
-                    case 0: // GST or SVC is already in item price
-                        mUseSubtotals = false;
-                        break;
-                    case -1: // SubTotal < Total
-                        amount = mTotal.subtract(sumOfTotals);
-                        percent = calculatePercent(amount, mTotal);
+            comparison = mSubTotal.compareTo(mTotal);
+            switch (comparison) {
+                case 1: // SubTotal is bigger, assume error in sub total.
+                case 0: // GST or SVC is already in item price
+                    mUseSubtotals = false;
+                    break;
+                case -1: // SubTotal < Total
+                    amount = mTotal.subtract(sumOfTotals);
+                    percent = calculatePercent(amount, mTotal);
 
-                        // Maximum of both GST and SVC percentage, assume error
-                        if(percent > (fMaxGSTpercent + fMaxSVCpercent))
+                    // Maximum of both GST and SVC percentage, assume error
+                    if(percent > (fMaxGSTpercent + fMaxSVCpercent))
+                        break;
+
+                    if (isZero(mSVC)) {
+                        Log.d("infer SVC", amount.toString());
+                        mSVC = amount;
+                        mSVCpercent = percent;
+                    } else if (isZero(mGST)) {
+                        // recaculate GST to include Items price and SVC
+                        amount = mTotal.subtract(sumOfTotals).subtract(mSVC);
+                        percent = calculatePercent(amount, mTotal);
+                        if(percent > (fMaxGSTpercent))
                             break;
 
-                        if (isZero(mSVC)) {
-                            Log.d("infer SVC", amount.toString());
-                            mSVC = amount;
-                            mSVCpercent = percent;
-                        } else if (isZero(mGST)) {
-                            // recaculate GST to include Items price and SVC
-                            amount = mTotal.subtract(sumOfTotals).subtract(mSVC);
-                            percent = calculatePercent(amount, mTotal);
-                            if(percent > (fMaxGSTpercent))
-                                break;
-
-                            Log.d("infer GST", amount.toString());
-                            mGST = amount;
-                            mGSTpercent = percent;
-                        }// otherwise, assume we are missing an item.
-                        break;
-                    default: // other unknown error
-                        break;
-                }
-            } else if (comparison > 0) // assume GST and SVC is included in item price or other error
-                mUseSubtotals = false;
+                        Log.d("infer GST", amount.toString());
+                        mGST = amount;
+                        mGSTpercent = percent;
+                    }// otherwise, assume we are missing an item.
+                    break;
+                default: // other unknown error
+                    break;
+            }
         }
 
         // Total or Sub Total equals to Sum of all items

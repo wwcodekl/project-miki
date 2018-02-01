@@ -48,6 +48,7 @@ import wwckl.projectmiki.utils.RunTimePermission;
 
 public class MainActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1001;
+    private static final int PICK_FROM_GALLERY = 1;
     final int REQUEST_INPUT_METHOD = 1;  // for checking of requestCode onActivityResult
     final int REQUEST_PICTURE_MEDIASTORE = 2;
     final int RESUME_FROM_OTHER = 0;
@@ -86,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         mLtGray = getResources().getColor(R.color.light_gray);
         mDkGray = getResources().getColor(R.color.dark_gray);
-        mLightishGray = getResources().getColor(R.color.lightish_gray);
-        mDarkishGray = getResources().getColor(R.color.darkish_gray);
+        mLightishGray = getResources().getColor(R.color.gray_90);
+        mDarkishGray = getResources().getColor(R.color.gray_25);
         mContrastBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -273,10 +274,6 @@ public class MainActivity extends AppCompatActivity {
                     mImageView.setImageBitmap(mReceiptPicture);
                 }
                 break;
-            case MY_PERMISSIONS_REQUEST_CAMERA:
-
-
-                break;
 
             default:
                 // Not the intended intent
@@ -332,11 +329,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startGallery() {
-        mResumeFrom = RESUME_FROM_GALLERY;
-        Intent intentGallery = new Intent(
-                Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-        startActivityForResult(intentGallery, REQUEST_PICTURE_MEDIASTORE);
+        if (!RunTimePermission.checkHasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PICK_FROM_GALLERY);
+        } else {
+            mResumeFrom = RESUME_FROM_GALLERY;
+            Intent intentGallery = new Intent(
+                    Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intentGallery, REQUEST_PICTURE_MEDIASTORE);
+        }
     }
 
     private void startCamera() {
