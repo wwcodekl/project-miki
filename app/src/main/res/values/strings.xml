@@ -79,6 +79,7 @@
     <string name="item_init">Item</string>
 
     <string name="edit_bill">Edit Bill</string>
+    <string name="share_bill">Share Bill</string>
     <string name="create_bill">Create Bill</string>
     <string name="description">Description</string>
     <string name="amount">Amount</string>

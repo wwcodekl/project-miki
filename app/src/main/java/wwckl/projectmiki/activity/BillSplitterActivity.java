@@ -44,6 +44,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     private BillSplit.BillSplitType mBillSplitType = BillSplit.BillSplitType.DUTCH_TYPE;
     private Bill mBill;
     private int mNumOfItems = 0;
+    private String mShareText = "";
 
     private MenuItem mMenuItemDutch;
     private MenuItem mMenuItemTreat;
@@ -155,6 +156,15 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 Intent myWebLink = new Intent(android.content.Intent.ACTION_VIEW);
                 myWebLink.setData(Uri.parse("https://github.com/WomenWhoCode/KL-network/wiki/Project-Miki-Help-File"));
                 startActivity(myWebLink);
+                return true;
+            case R.id.action_share:
+                String subject = "Miki Bill";
+                String body = mShareText;
+                Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
+                shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, body);
+                startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share_bill)));
                 return true;
             case R.id.dutch:
                 swapSplitType(BillSplit.BillSplitType.DUTCH_TYPE);
@@ -565,6 +575,8 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         }
 
         mSummaryTextView.setText(summaryText);
+
+        setShareText(mSummaryTextView.getText().toString());
     }
 
     private int getNumOfSharing(){
@@ -715,6 +727,11 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         toast.setDuration(Toast.LENGTH_SHORT);
         toast.setView(layout);
         toast.show();
+    }
+
+    public void setShareText(String text)
+    {
+        mShareText = text;
     }
 
     public void highlightSplitItems(int index, Boolean setSelected) {
