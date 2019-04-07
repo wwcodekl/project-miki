@@ -299,6 +299,9 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             mInstructionsTextView.setVisibility(View.GONE);
             mSummaryLayout.setVisibility(View.GONE);
             mSelectAllCheckBox.setVisibility(View.GONE);
+
+            // get split summary
+            mShareText = mSummaryFragment.getBillSplitSummary();
         }
         else if (mBill.getNumOfBillSplits() == 0) {
             mButtonPrev.setVisibility(View.INVISIBLE);
@@ -575,8 +578,6 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         }
 
         mSummaryTextView.setText(summaryText);
-
-        setShareText(mSummaryTextView.getText().toString());
     }
 
     private int getNumOfSharing(){
@@ -754,5 +755,23 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             }
             id++;
         }
+    }
+
+    public String printSplitItems(int index) {
+        Iterator<Item> iterator = mBill.getListOfAllItems().iterator();
+        int id = 0;
+        StringBuilder items = new StringBuilder();
+
+        while (iterator.hasNext()) {
+            Item item = iterator.next();
+
+            CheckBox checkBox = (CheckBox) mItemizedLayout.findViewById(id);
+            if (checkBox != null && item.getGuestIndex() == index) {
+                items.append("\n").append("- ");
+                items.append(checkBox.getText().toString());
+            }
+            id++;
+        }
+        return items.toString();
     }
 }
