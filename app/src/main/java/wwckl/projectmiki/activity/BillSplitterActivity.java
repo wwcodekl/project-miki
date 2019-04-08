@@ -158,13 +158,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 startActivity(myWebLink);
                 return true;
             case R.id.action_share:
-                String subject = "Miki Bill";
-                String body = mShareText;
-                Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
-                shareIntent.setType("text/plain");
-                shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
-                shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, body);
-                startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share_bill)));
+                shareBill();
                 return true;
             case R.id.dutch:
                 swapSplitType(BillSplit.BillSplitType.DUTCH_TYPE);
@@ -730,9 +724,14 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         toast.show();
     }
 
-    public void setShareText(String text)
-    {
-        mShareText = text;
+    private void shareBill() {
+        String subject = getString(R.string.app_name);
+        String body = mShareText;
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, body);
+        startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share_bill)));
     }
 
     public void highlightSplitItems(int index, Boolean setSelected) {

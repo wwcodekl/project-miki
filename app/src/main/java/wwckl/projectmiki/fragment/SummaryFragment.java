@@ -271,7 +271,7 @@ public class SummaryFragment extends Fragment {
     {
         TextView textView;
         StringBuilder summary = new StringBuilder();
-        summary.append("*Split Bill Lah*");
+        summary.append("*").append(getString(R.string.app_name)).append("*");
         for (int i = 0; i < mNumOfTextView; i++) {
             textView = (TextView) mLinearLayout.findViewById(i);
             summary.append("\n");
