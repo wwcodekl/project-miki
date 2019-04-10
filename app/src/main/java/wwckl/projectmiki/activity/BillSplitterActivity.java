@@ -725,7 +725,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     }
 
     private void shareBill() {
-        String subject = getString(R.string.app_name);
+        String subject = getResources().getString(R.string.app_name);
         String body = mShareText;
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
