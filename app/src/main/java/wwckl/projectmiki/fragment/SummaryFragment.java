@@ -179,14 +179,14 @@ public class SummaryFragment extends Fragment {
                 summaryText = "T+";
                 //summaryText = getBillSplitString(BillSplit.BillSplitType.TREAT_TYPE) + " ($" + mTreatAmountPax.toString() + ") ";
             case DUTCH_TYPE:
-                summaryText = summaryText + treatTypeText + " \t" + getString(R.string.guest) + " " +
-                        Array.get(mAlphabets, mTotalNumOfPpl-1) + " : $" + amount.toString();
+                summaryText = String.format("%s%s \t%s %s : $%s", summaryText, treatTypeText, getString(R.string.guest),
+                        Array.get(mAlphabets, mTotalNumOfPpl-1), amount);
                 summaryTextView.setGravity(Gravity.RIGHT);
                 break;
 
             case TREAT_TYPE:
-                summaryText = treatTypeText + " ($" + amount.toString() + ") by " +
-                        billSplit.getNoOfPplSharing() + " : $" + billSplit.getSplitAmount().toString();
+                summaryText = String.format("%s ($%s) by %s : $%s", treatTypeText, amount.toString(),
+                        billSplit.getNoOfPplSharing(), billSplit.getSplitAmount().toString());
                 summaryTextView.setGravity(Gravity.LEFT);
                 break;
 
@@ -194,8 +194,8 @@ public class SummaryFragment extends Fragment {
                 summaryText = "T+";
                 //summaryText = getBillSplitString(BillSplit.BillSplitType.TREAT_TYPE) + " ($" + mTreatAmountPax.toString() + ") ";
             case SHARE_TYPE:
-                summaryText = summaryText + treatTypeText + " ($" + amount.toString() + ") by " +
-                        billSplit.getNoOfPplSharing() + " : $" + billSplit.getSplitAmount().toString();
+                summaryText = String.format("%s%s ($%s) by %s : $%s", summaryText, treatTypeText, amount.toString(),
+                        billSplit.getNoOfPplSharing(), billSplit.getSplitAmount().toString());
                 summaryTextView.setGravity(Gravity.RIGHT);
                 break;
         }
@@ -265,6 +265,19 @@ public class SummaryFragment extends Fragment {
             textView = (TextView) mLinearLayout.findViewById(i);
             textView.setTextAppearance(this.getActivity(), android.R.style.TextAppearance_Large);
         }
+    }
 
+    public String getBillSplitSummary()
+    {
+        TextView textView;
+        StringBuilder summary = new StringBuilder();
+        summary.append("*").append(getString(R.string.app_name)).append("*");
+        for (int i = 0; i < mNumOfTextView; i++) {
+            textView = (TextView) mLinearLayout.findViewById(i);
+            summary.append("\n");
+            summary.append(textView.getText().toString());
+            summary.append(mBillSplitterActivity.printSplitItems(i));
+        }
+        return summary.toString();
     }
 }

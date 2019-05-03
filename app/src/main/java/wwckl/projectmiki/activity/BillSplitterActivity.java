@@ -44,6 +44,7 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
     private BillSplit.BillSplitType mBillSplitType = BillSplit.BillSplitType.DUTCH_TYPE;
     private Bill mBill;
     private int mNumOfItems = 0;
+    private String mShareText = "";
 
     private MenuItem mMenuItemDutch;
     private MenuItem mMenuItemTreat;
@@ -155,6 +156,9 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
                 Intent myWebLink = new Intent(android.content.Intent.ACTION_VIEW);
                 myWebLink.setData(Uri.parse("https://github.com/WomenWhoCode/KL-network/wiki/Project-Miki-Help-File"));
                 startActivity(myWebLink);
+                return true;
+            case R.id.action_share:
+                shareBill();
                 return true;
             case R.id.dutch:
                 swapSplitType(BillSplit.BillSplitType.DUTCH_TYPE);
@@ -289,6 +293,9 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             mInstructionsTextView.setVisibility(View.GONE);
             mSummaryLayout.setVisibility(View.GONE);
             mSelectAllCheckBox.setVisibility(View.GONE);
+
+            // get split summary
+            mShareText = mSummaryFragment.getBillSplitSummary();
         }
         else if (mBill.getNumOfBillSplits() == 0) {
             mButtonPrev.setVisibility(View.INVISIBLE);
@@ -717,6 +724,16 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
         toast.show();
     }
 
+    private void shareBill() {
+        String subject = getResources().getString(R.string.app_name);
+        String body = mShareText;
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, body);
+        startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share_bill)));
+    }
+
     public void highlightSplitItems(int index, Boolean setSelected) {
         Iterator<Item> iterator = mBill.getListOfAllItems().iterator();
         int id = 0;
@@ -737,5 +754,23 @@ public class BillSplitterActivity extends AppCompatActivity implements AdapterVi
             }
             id++;
         }
+    }
+
+    public String printSplitItems(int index) {
+        Iterator<Item> iterator = mBill.getListOfAllItems().iterator();
+        int id = 0;
+        StringBuilder items = new StringBuilder();
+
+        while (iterator.hasNext()) {
+            Item item = iterator.next();
+
+            CheckBox checkBox = (CheckBox) mItemizedLayout.findViewById(id);
+            if (checkBox != null && item.getGuestIndex() == index) {
+                items.append("\n").append("- ");
+                items.append(checkBox.getText().toString());
+            }
+            id++;
+        }
+        return items.toString();
     }
 }
